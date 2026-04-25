@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from gymguide.models.enums import TipoSuplementoEnum
 
 
 class Suplemento(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
-    type: str = Field(..., pattern="^(Proteina|Creatina|Pre-Entreno|Amino acidos|Vitaminas|Fat burner)$")
+    type: TipoSuplementoEnum
     brand: str
     benefits: str
     status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
@@ -25,7 +26,7 @@ class SuplementoID(Suplemento):
 
 class SuplementoUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    type: Optional[str] = Field(None, pattern="^(Proteina|Creatina|Pre-Entreno|Amino acidos|Vitaminas|Fat burner)$")
+    type: Optional[TipoSuplementoEnum] = None
     brand: Optional[str] = None
     benefits: Optional[str] = None
     status: Optional[str] = Field(None, pattern="^(active|inactive)$")

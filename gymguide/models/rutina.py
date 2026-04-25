@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from gymguide.models.enums import LevelEnum, ObjectiveEnum
 
 
 class Rutina(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
-    level: str = Field(..., pattern="^(Principiante|Intermedio|Avanzado)$")
-    objective: str = Field(..., pattern="^(Ganancia Muscular|Perdida de grasa|Fuerza|Resitencia)$")
+    level: LevelEnum
+    objective: ObjectiveEnum
     duration_weeks: int = Field(..., ge=1, le=52)
     status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
 
@@ -24,7 +25,7 @@ class RutinaID(Rutina):
 
 class RutinaUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    level: Optional[str] = Field(None, pattern="^(Principiante|Intermedio|Avanzado)$")
-    objective: Optional[str] = Field(None, pattern="^(Ganancia Muscular|Perdida de grasa|Fuerza|Resitencia)$")
+    level: Optional[LevelEnum] = None
+    objective: Optional[ObjectiveEnum] = None
     duration_weeks: Optional[int] = Field(None, ge=1, le=52)
     status: Optional[str] = Field(None, pattern="^(active|inactive)$")

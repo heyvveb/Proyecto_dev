@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from gymguide.models.enums import CategoriaEnum
 
 
 class Influencer(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
-    Categoria: str = Field(..., pattern="^(bodybuilding|fitness|powerlifting|crossfit|yoga)$")
+    Categoria: CategoriaEnum
     logros: str 
     red_social: str
     rutina_recomendada_id: Optional[int] = None
@@ -26,7 +27,7 @@ class InfluencerID(Influencer):
 
 class InfluencerUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    Categoria: Optional[str] = Field(None, pattern="^(bodybuilding|fitness|powerlifting|crossfit|yoga)$")
+    Categoria: Optional[CategoriaEnum] = None
     logros: Optional[str] = None
     red_social: Optional[str] = None
     rutina_recomendada_id: Optional[int] = None
