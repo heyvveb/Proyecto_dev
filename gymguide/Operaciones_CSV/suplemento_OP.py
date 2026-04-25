@@ -5,7 +5,7 @@ from gymguide.models.suplemento import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "data", "Suplementos.csv")
-columns=["id","name","type","brand","benefits"]
+columns=["id","name","type","brand","benefits","status"]
 
 def ensure_file():
     os.makedirs(os.path.dirname(CSV_FILE), exist_ok=True)
@@ -47,24 +47,29 @@ def createSuplemento(suplemento:Suplemento):
     saveSuplementoID(new_suplemento)
     return new_suplemento
 
-def showSuplementos():
+def showSuplementos(include_inactive: bool = False):
     ensure_file()
     with open(CSV_FILE) as csvfile:
         reader= csv.DictReader(csvfile)
-        return [SuplementoID(**row) for row in reader]
+        all_suplementos = [SuplementoID(**row) for row in reader]
+        if include_inactive:
+            return all_suplementos
+        return [s for s in all_suplementos if s.status == "active"]
     
-def showSuplemento_ID(id:int):
+def showSuplemento_ID(id:int, include_inactive: bool = False):
     ensure_file()
     with open (CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if int(row['id'])==id:
-                return SuplementoID(**row)
+                suplemento = SuplementoID(**row)
+                if include_inactive or suplemento.status == "active":
+                    return suplemento
             
 def updateSuplemento(id:int,suplemento:SuplementoUpdate):
     ensure_file()
     suplemento_update: Optional[SuplementoID]=None
-    suplementos = showSuplementos()
+    suplementos = showSuplementos(include_inactive=True)
     for num, suplemento_ in enumerate(suplementos):
         if suplemento_.id==id:
             suplementos[num]=(suplemento_update)=suplemento_.model_copy(update=suplemento)
@@ -79,15 +84,17 @@ def updateSuplemento(id:int,suplemento:SuplementoUpdate):
 def deleteSuplemento(id:int):
     ensure_file()
     suplemento_deleted: Optional[Suplemento]=None
-    suplementos = showSuplementos()
+    suplementos = showSuplementos(include_inactive=True)
     with open (CSV_FILE, mode="w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
         writer.writeheader()
         for suplemento_ in suplementos:
             if suplemento_.id == id:
                 suplemento_deleted = suplemento_
-                continue
-            writer.writerow(suplemento_.model_dump())
+                suplemento_.status = "inactive"
+                writer.writerow(suplemento_.model_dump())
+            else:
+                writer.writerow(suplemento_.model_dump())
     if suplemento_deleted:
         dict_suplemento_no_id = suplemento_deleted.model_dump()
         del dict_suplemento_no_id["id"]
@@ -100,7 +107,28 @@ def showSuplementosType(type: str):
     with open(CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['type'].lower() == type.lower():
+            if row['type'].lower() == type.lower() and row['status'] == 'active':
                 suplementos.append(SuplementoID(**row))
 
     return suplementos
+
+def showInactiveSuplementos():
+    ensure_file()
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        return [SuplementoID(**row) for row in reader if row['status'] == 'inactive']
+
+def restoreSuplemento(id: int):
+    ensure_file()
+    suplemento_restored: Optional[SuplementoID] = None
+    suplementos = showSuplementos(include_inactive=True)
+    for num, suplemento_ in enumerate(suplementos):
+        if suplemento_.id == id and suplemento_.status == "inactive":
+            suplementos[num] = suplemento_restored = suplemento_.model_copy(update={"status": "active"})
+    with open(CSV_FILE, mode="w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=columns)
+        writer.writeheader()
+        for suplemento_ in suplementos:
+            writer.writerow(suplemento_.model_dump())
+    if suplemento_restored:
+        return suplemento_restored

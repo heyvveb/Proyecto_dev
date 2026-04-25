@@ -5,7 +5,7 @@ from gymguide.models.rutina import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "data", "Rutinas.csv")
-columns=["id","name","level","objective","duration_weeks"]
+columns=["id","name","level","objective","duration_weeks","status"]
 
 def ensure_file():
     os.makedirs(os.path.dirname(CSV_FILE), exist_ok=True)
@@ -47,24 +47,29 @@ def createRutina(rutina:Rutina):
     saveRutinaID(new_rutina)
     return new_rutina
 
-def showRutinas():
+def showRutinas(include_inactive: bool = False):
     ensure_file()
     with open(CSV_FILE) as csvfile:
         reader= csv.DictReader(csvfile)
-        return [RutinaID(**row) for row in reader]
+        all_rutinas = [RutinaID(**row) for row in reader]
+        if include_inactive:
+            return all_rutinas
+        return [r for r in all_rutinas if r.status == "active"]
     
-def showRutina_ID(id:int):
+def showRutina_ID(id:int, include_inactive: bool = False):
     ensure_file()
     with open (CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if int(row['id'])==id:
-                return RutinaID(**row)
+                rutina = RutinaID(**row)
+                if include_inactive or rutina.status == "active":
+                    return rutina
             
 def updateRutina(id:int,rutina:RutinaUpdate):
     ensure_file()
     rutina_update: Optional[RutinaID]=None
-    rutinas = showRutinas()
+    rutinas = showRutinas(include_inactive=True)
     for num, rutina_ in enumerate(rutinas):
         if rutina_.id==id:
             rutinas[num]=(rutina_update)=rutina_.model_copy(update=rutina)
@@ -79,15 +84,17 @@ def updateRutina(id:int,rutina:RutinaUpdate):
 def deleteRutina(id:int):
     ensure_file()
     rutina_deleted: Optional[Rutina]=None
-    rutinas = showRutinas()
+    rutinas = showRutinas(include_inactive=True)
     with open (CSV_FILE, mode="w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
         writer.writeheader()
         for rutina_ in rutinas:
             if rutina_.id == id:
                 rutina_deleted = rutina_
-                continue
-            writer.writerow(rutina_.model_dump())
+                rutina_.status = "inactive"
+                writer.writerow(rutina_.model_dump())
+            else:
+                writer.writerow(rutina_.model_dump())
     if rutina_deleted:
         dict_rutina_no_id = rutina_deleted.model_dump()
         del dict_rutina_no_id["id"]
@@ -100,7 +107,28 @@ def showRutinasLevel(level: str):
     with open(CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['level'].lower() == level.lower():
+            if row['level'].lower() == level.lower() and row['status'] == 'active':
                 rutinas.append(RutinaID(**row))
 
     return rutinas
+
+def showInactiveRutinas():
+    ensure_file()
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        return [RutinaID(**row) for row in reader if row['status'] == 'inactive']
+
+def restoreRutina(id: int):
+    ensure_file()
+    rutina_restored: Optional[RutinaID] = None
+    rutinas = showRutinas(include_inactive=True)
+    for num, rutina_ in enumerate(rutinas):
+        if rutina_.id == id and rutina_.status == "inactive":
+            rutinas[num] = rutina_restored = rutina_.model_copy(update={"status": "active"})
+    with open(CSV_FILE, mode="w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=columns)
+        writer.writeheader()
+        for rutina_ in rutinas:
+            writer.writerow(rutina_.model_dump())
+    if rutina_restored:
+        return rutina_restored

@@ -6,7 +6,7 @@ from gymguide.Operaciones_CSV.rutina_OP import showRutina_ID
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "data", "Influencers.csv")
-columns=["id","name","Categoria","logros","red_social","rutina_recomendada_id"]
+columns=["id","name","Categoria","logros","red_social","rutina_recomendada_id","status"]
 
 def ensure_file():
     os.makedirs(os.path.dirname(CSV_FILE), exist_ok=True)
@@ -51,24 +51,29 @@ def createInfluencer(influencer:Influencer):
     saveInfluencerID(new_influencer)
     return new_influencer
 
-def showInfluencers():
+def showInfluencers(include_inactive: bool = False):
     ensure_file()
     with open(CSV_FILE) as csvfile:
         reader= csv.DictReader(csvfile)
-        return [InfluencerID(**row) for row in reader]
+        all_influencers = [InfluencerID(**row) for row in reader]
+        if include_inactive:
+            return all_influencers
+        return [i for i in all_influencers if i.status == "active"]
     
-def showInfluencer_ID(id:int):
+def showInfluencer_ID(id:int, include_inactive: bool = False):
     ensure_file()
     with open (CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if int(row['id'])==id:
-                return InfluencerID(**row)
+                influencer = InfluencerID(**row)
+                if include_inactive or influencer.status == "active":
+                    return influencer
             
 def updateInfluencer(id:int,influencer:InfluencerUpdate):
     ensure_file()
     influencer_update: Optional[InfluencerID]=None
-    influencers = showInfluencers()
+    influencers = showInfluencers(include_inactive=True)
     for num, influencer_ in enumerate(influencers):
         if influencer_.id==id:
             influencers[num]=(influencer_update)=influencer_.model_copy(update=influencer)
@@ -86,15 +91,17 @@ def updateInfluencer(id:int,influencer:InfluencerUpdate):
 def deleteInfluencer(id:int):
     ensure_file()
     influencer_deleted: Optional[Influencer]=None
-    influencers = showInfluencers()
+    influencers = showInfluencers(include_inactive=True)
     with open (CSV_FILE, mode="w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
         writer.writeheader()
         for influencer_ in influencers:
             if influencer_.id == id:
                 influencer_deleted = influencer_
-                continue
-            writer.writerow(influencer_.model_dump())
+                influencer_.status = "inactive"
+                writer.writerow(influencer_.model_dump())
+            else:
+                writer.writerow(influencer_.model_dump())
     if influencer_deleted:
         dict_influencer_no_id = influencer_deleted.model_dump()
         del dict_influencer_no_id["id"]
@@ -107,7 +114,28 @@ def showInfluencersCategory(categoria: str):
     with open(CSV_FILE) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['Categoria'].lower() == categoria.lower():
+            if row['Categoria'].lower() == categoria.lower() and row['status'] == 'active':
                 influencers.append(InfluencerID(**row))
 
     return influencers
+
+def showInactiveInfluencers():
+    ensure_file()
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        return [InfluencerID(**row) for row in reader if row['status'] == 'inactive']
+
+def restoreInfluencer(id: int):
+    ensure_file()
+    influencer_restored: Optional[InfluencerID] = None
+    influencers = showInfluencers(include_inactive=True)
+    for num, influencer_ in enumerate(influencers):
+        if influencer_.id == id and influencer_.status == "inactive":
+            influencers[num] = influencer_restored = influencer_.model_copy(update={"status": "active"})
+    with open(CSV_FILE, mode="w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=columns)
+        writer.writeheader()
+        for influencer_ in influencers:
+            writer.writerow(influencer_.model_dump())
+    if influencer_restored:
+        return influencer_restored
