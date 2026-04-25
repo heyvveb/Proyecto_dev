@@ -7,6 +7,7 @@ class Suplemento(BaseModel):
     type: str = Field(..., pattern="^(Proteina|Creatina|Pre-Entreno|Amino acidos|Vitaminas|Fat burner)$")
     brand: str
     benefits: str
+    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
 
     class Config:
         json_schema_extra = {
@@ -14,7 +15,8 @@ class Suplemento(BaseModel):
                 "name": "Whey Protein Isolate",
                 "type": "Proteina",
                 "brand": "Optimum Nutrition",
-                "benefits": "Proteina de rápida absorción para la recuperación muscular."
+                "benefits": "Proteina de rápida absorción para la recuperación muscular.",
+                "status": "active"
             }
         }
 
@@ -26,3 +28,4 @@ class SuplementoUpdate(BaseModel):
     type: Optional[str] = Field(None, pattern="^(Proteina|Creatina|Pre-Entreno|Amino acidos|Vitaminas|Fat burner)$")
     brand: Optional[str] = None
     benefits: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(active|inactive)$")

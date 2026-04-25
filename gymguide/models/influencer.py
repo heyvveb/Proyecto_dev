@@ -8,6 +8,7 @@ class Influencer(BaseModel):
     logros: str 
     red_social: str
     rutina_recomendada_id: Optional[int] = None
+    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
 
     class Config:
         json_schema_extra = {
@@ -16,7 +17,8 @@ class Influencer(BaseModel):
                 "Categoria": "bodybuilding",
                 "logros": "Mr. Olympia 2024",
                 "red_social": "@cbum",
-                "rutina_recomendada_id": 1
+                "rutina_recomendada_id": 1,
+                "status": "active"
             }
         }
 class InfluencerID(Influencer):
@@ -28,3 +30,4 @@ class InfluencerUpdate(BaseModel):
     logros: Optional[str] = None
     red_social: Optional[str] = None
     rutina_recomendada_id: Optional[int] = None
+    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
