@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Rutina(BaseModel):
-    id: int
     name: str = Field(..., min_length=1, max_length=100)
     level: str = Field(..., pattern="^(Principiante|Intermedio|Avanzado)$")
     objective: str = Field(..., pattern="^(Ganancia Muscular|Perdida de grasa|Fuerza|Resitencia)$")
@@ -12,7 +11,6 @@ class Rutina(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": 1,
                 "name": "Programa de Hipertrofia",
                 "level": "Intermedio",
                 "objective": "Ganancia muscular",
