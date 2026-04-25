@@ -28,6 +28,11 @@ async def get_rutinas_by_objective(objective: ObjectiveEnum):
     return showRutinasObjective(objective.value)
 
 
+@router_rutinas.get("/by-name/{name}", response_model=list[Rutina])
+async def get_rutinas_by_name(name: str):
+    return showRutinasName(name)
+
+
 @router_rutinas.get("/{rutina_id}", response_model=Rutina)
 async def get_rutina(rutina_id: int):
     rutina = showRutina_ID(rutina_id)

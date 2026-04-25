@@ -24,6 +24,11 @@ async def get_suplementos_by_type(type: TipoSuplementoEnum):
     return showSuplementosType(type.value)
 
 
+@router_suplementos.get("/by-name/{name}", response_model=list[Suplemento])
+async def get_suplementos_by_name(name: str):
+    return showSuplementosName(name)
+
+
 @router_suplementos.get("/{suplemento_id}", response_model=Suplemento)
 async def get_suplemento(suplemento_id: int):
     suplemento = showSuplemento_ID(suplemento_id)

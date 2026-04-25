@@ -23,6 +23,11 @@ async def get_influencers_by_category(category: CategoriaEnum):
     return showInfluencersCategory(category.value)
 
 
+@router_influencers.get("/by-name/{name}", response_model=list[Influencer])
+async def get_influencers_by_name(name: str):
+    return showInfluencersName(name)
+
+
 @router_influencers.get("/{influencer_id}", response_model=Influencer)
 async def get_influencer(influencer_id: int):
     influencer = showInfluencer_ID(influencer_id)
