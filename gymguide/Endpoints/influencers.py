@@ -12,6 +12,11 @@ async def get_all_influencers():
     return influencers
 
 
+@router_influencers.get("/deleted", response_model=list[Influencer])
+async def get_inactive_influencers():
+    return showInactiveInfluencers()
+
+
 @router_influencers.get("/by-category/{category}", response_model=list[Influencer])
 async def get_influencers_by_category(category: str):
     return showInfluencersCategory(category)
@@ -46,3 +51,10 @@ async def delete_influencer(influencer_id: int):
     deleted = deleteInfluencer(influencer_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Influencer not found")
+
+
+@router_influencers.post("/{influencer_id}/restore", response_model=Influencer)
+async def restore_influencer(influencer_id: int):
+    restored = restoreInfluencer(influencer_id)
+    if not restored:
+        raise HTTPException(status_code=404, detail="Influencer not found or already active")
