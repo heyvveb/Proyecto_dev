@@ -6,6 +6,6 @@ from gymguide.Endpoints.suplementos import router_suplementos
 
 app = FastAPI()
 
-app.include_router(router_influencers)
 app.include_router(router_rutinas)
+app.include_router(router_influencers)
 app.include_router(router_suplementos)

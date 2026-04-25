@@ -7,33 +7,33 @@ from gymguide.Operaciones_CSV.rutina_OP import *
 
 router_rutinas = APIRouter(prefix="/rutinas", tags=["Rutinas"])
 
-@router_rutinas.get("", response_model=list[Rutina])
+@router_rutinas.get("", response_model=list[RutinaID])
 async def get_all_rutinas():
     rutinas=showRutinas()
     return rutinas
 
 
-@router_rutinas.get("/deleted", response_model=list[Rutina])
+@router_rutinas.get("/deleted", response_model=list[RutinaID])
 async def get_inactive_rutinas():
     return showInactiveRutinas()
 
 
-@router_rutinas.get("/by-level/{level}", response_model=list[Rutina])
+@router_rutinas.get("/by-level/{level}", response_model=list[RutinaID])
 async def get_rutinas_by_level(level: LevelEnum):
     return showRutinasLevel(level.value)
 
 
-@router_rutinas.get("/by-objective/{objective}", response_model=list[Rutina])
+@router_rutinas.get("/by-objective/{objective}", response_model=list[RutinaID])
 async def get_rutinas_by_objective(objective: ObjectiveEnum):
     return showRutinasObjective(objective.value)
 
 
-@router_rutinas.get("/by-name/{name}", response_model=list[Rutina])
+@router_rutinas.get("/by-name/{name}", response_model=list[RutinaID])
 async def get_rutinas_by_name(name: str):
     return showRutinasName(name)
 
 
-@router_rutinas.get("/{rutina_id}", response_model=Rutina)
+@router_rutinas.get("/{rutina_id}", response_model=RutinaID)
 async def get_rutina(rutina_id: int):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -43,7 +43,7 @@ async def get_rutina(rutina_id: int):
     return rutina
 
 
-@router_rutinas.post("", response_model=Rutina, status_code=201)
+@router_rutinas.post("", response_model=RutinaID, status_code=201)
 async def create_rutina(rutina: Rutina):
     try:
         return createRutina(rutina)
@@ -51,7 +51,7 @@ async def create_rutina(rutina: Rutina):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router_rutinas.patch("/{rutina_id}", response_model=Rutina)
+@router_rutinas.patch("/{rutina_id}", response_model=RutinaID)
 async def update_rutina(rutina_id: int, data: RutinaUpdate):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -70,7 +70,7 @@ async def delete_rutina(rutina_id: int):
         raise HTTPException(status_code=404, detail="Rutina not found")
 
 
-@router_rutinas.post("/{rutina_id}/restore", response_model=Rutina)
+@router_rutinas.post("/{rutina_id}/restore", response_model=RutinaID)
 async def restore_rutina(rutina_id: int):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")

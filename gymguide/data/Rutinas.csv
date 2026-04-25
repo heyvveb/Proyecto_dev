@@ -1,5 +1,3 @@
 id,name,level,objective,duration_weeks,status
-1,Programa Hipertrofia Clásica,Intermedio,Ganancia Muscular,12,active
-2,CrossFit Foundations,Principiante,Resitencia,8,active
-3,Powerlifting Elite,Avanzado,Fuerza,16,active
-4,Rutina Cutting,Intermedio,Perdida de grasa,6,active
+1,Programa de Hipertrofia,Intermedio,Ganancia Muscular,12,active
+2,Programa de Hipertrofia,Intermedio,Ganancia Muscular,12,active

@@ -1,34 +1,34 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
-from gymguide.models.influencer import Influencer,InfluencerID, InfluencerUpdate
+from gymguide.models.influencer import Influencer, InfluencerID, InfluencerUpdate
 from gymguide.models.enums import CategoriaEnum
 from gymguide.Operaciones_CSV.influencers_op import *
 
 
 router_influencers = APIRouter(prefix="/influencers", tags=["Influencers"])
 
-@router_influencers.get("", response_model=list[Influencer])
+@router_influencers.get("", response_model=list[InfluencerID])
 async def get_all_influencers():
     influencers=showInfluencers()
     return influencers
 
 
-@router_influencers.get("/deleted", response_model=list[Influencer])
+@router_influencers.get("/deleted", response_model=list[InfluencerID])
 async def get_inactive_influencers():
     return showInactiveInfluencers()
 
 
-@router_influencers.get("/by-category/{category}", response_model=list[Influencer])
+@router_influencers.get("/by-category/{category}", response_model=list[InfluencerID])
 async def get_influencers_by_category(category: CategoriaEnum):
     return showInfluencersCategory(category.value)
 
 
-@router_influencers.get("/by-name/{name}", response_model=list[Influencer])
+@router_influencers.get("/by-name/{name}", response_model=list[InfluencerID])
 async def get_influencers_by_name(name: str):
     return showInfluencersName(name)
 
 
-@router_influencers.get("/{influencer_id}", response_model=Influencer)
+@router_influencers.get("/{influencer_id}", response_model=InfluencerID)
 async def get_influencer(influencer_id: int):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -38,7 +38,7 @@ async def get_influencer(influencer_id: int):
     return influencer
 
 
-@router_influencers.post("", response_model=Influencer, status_code=201)
+@router_influencers.post("", response_model=InfluencerID, status_code=201)
 async def create_influencer(influencer: Influencer):
     try:
         return createInfluencer(influencer)
@@ -46,7 +46,7 @@ async def create_influencer(influencer: Influencer):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router_influencers.patch("/{influencer_id}", response_model=Influencer)
+@router_influencers.patch("/{influencer_id}", response_model=InfluencerID)
 async def update_influencer(influencer_id: int, data: InfluencerUpdate):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -65,7 +65,7 @@ async def delete_influencer(influencer_id: int):
         raise HTTPException(status_code=404, detail="Influencer not found")
 
 
-@router_influencers.post("/{influencer_id}/restore", response_model=Influencer)
+@router_influencers.post("/{influencer_id}/restore", response_model=InfluencerID)
 async def restore_influencer(influencer_id: int):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
