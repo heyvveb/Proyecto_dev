@@ -30,6 +30,8 @@ async def get_influencers_by_name(name: str):
 
 @router_influencers.get("/{influencer_id}", response_model=Influencer)
 async def get_influencer(influencer_id: int):
+    if influencer_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     influencer = showInfluencer_ID(influencer_id)
     if not influencer:
         raise HTTPException(status_code=404, detail="Influencer not found")
@@ -46,6 +48,8 @@ async def create_influencer(influencer: Influencer):
 
 @router_influencers.patch("/{influencer_id}", response_model=Influencer)
 async def update_influencer(influencer_id: int, data: InfluencerUpdate):
+    if influencer_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     updated = updateInfluencer(influencer_id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Influencer not found")
@@ -54,6 +58,8 @@ async def update_influencer(influencer_id: int, data: InfluencerUpdate):
 
 @router_influencers.delete("/{influencer_id}", status_code=204)
 async def delete_influencer(influencer_id: int):
+    if influencer_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     deleted = deleteInfluencer(influencer_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Influencer not found")
@@ -61,6 +67,8 @@ async def delete_influencer(influencer_id: int):
 
 @router_influencers.post("/{influencer_id}/restore", response_model=Influencer)
 async def restore_influencer(influencer_id: int):
+    if influencer_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     restored = restoreInfluencer(influencer_id)
     if not restored:
         raise HTTPException(status_code=404, detail="Influencer not found or already active")

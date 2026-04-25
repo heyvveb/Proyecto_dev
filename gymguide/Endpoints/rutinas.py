@@ -35,6 +35,8 @@ async def get_rutinas_by_name(name: str):
 
 @router_rutinas.get("/{rutina_id}", response_model=Rutina)
 async def get_rutina(rutina_id: int):
+    if rutina_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     rutina = showRutina_ID(rutina_id)
     if not rutina:
         raise HTTPException(status_code=404, detail="Rutina not found")
@@ -51,6 +53,8 @@ async def create_rutina(rutina: Rutina):
 
 @router_rutinas.patch("/{rutina_id}", response_model=Rutina)
 async def update_rutina(rutina_id: int, data: RutinaUpdate):
+    if rutina_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     updated = updateRutina(rutina_id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Rutina not found")
@@ -59,6 +63,8 @@ async def update_rutina(rutina_id: int, data: RutinaUpdate):
 
 @router_rutinas.delete("/{rutina_id}", status_code=204)
 async def delete_rutina(rutina_id: int):
+    if rutina_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     deleted = deleteRutina(rutina_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Rutina not found")
@@ -66,6 +72,8 @@ async def delete_rutina(rutina_id: int):
 
 @router_rutinas.post("/{rutina_id}/restore", response_model=Rutina)
 async def restore_rutina(rutina_id: int):
+    if rutina_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
     restored = restoreRutina(rutina_id)
     if not restored:
         raise HTTPException(status_code=404, detail="Rutina not found or already active")
