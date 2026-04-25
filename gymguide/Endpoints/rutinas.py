@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
+from gymguide.models.enums import LevelEnum, ObjectiveEnum
 from gymguide.Operaciones_CSV.rutina_OP import *
 
 
@@ -18,8 +19,13 @@ async def get_inactive_rutinas():
 
 
 @router_rutinas.get("/by-level/{level}", response_model=list[Rutina])
-async def get_rutinas_by_level(level: str):
-    return showRutinasLevel(level)
+async def get_rutinas_by_level(level: LevelEnum):
+    return showRutinasLevel(level.value)
+
+
+@router_rutinas.get("/by-objective/{objective}", response_model=list[Rutina])
+async def get_rutinas_by_objective(objective: ObjectiveEnum):
+    return showRutinasObjective(objective.value)
 
 
 @router_rutinas.get("/{rutina_id}", response_model=Rutina)

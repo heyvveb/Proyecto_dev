@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from gymguide.models.suplemento import Suplemento, SuplementoID, SuplementoUpdate
+from gymguide.models.enums import TipoSuplementoEnum
 from gymguide.Operaciones_CSV.suplemento_OP import *
 
 
@@ -13,14 +14,14 @@ async def get_all_suplementos():
 
 
 
-@router_suplementos.get("/inactive", response_model=list[Suplemento])
+@router_suplementos.get("/deleted", response_model=list[Suplemento])
 async def get_inactive_suplementos():
     return showInactiveSuplementos()
 
 
 @router_suplementos.get("/by-type/{type}", response_model=list[Suplemento])
-async def get_suplementos_by_type(type: str):
-    return showSuplementosType(type)
+async def get_suplementos_by_type(type: TipoSuplementoEnum):
+    return showSuplementosType(type.value)
 
 
 @router_suplementos.get("/{suplemento_id}", response_model=Suplemento)

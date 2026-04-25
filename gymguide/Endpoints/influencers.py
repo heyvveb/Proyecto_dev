@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from gymguide.models.influencer import Influencer,InfluencerID, InfluencerUpdate
+from gymguide.models.enums import CategoriaEnum
 from gymguide.Operaciones_CSV.influencers_op import *
 
 
@@ -18,8 +19,8 @@ async def get_inactive_influencers():
 
 
 @router_influencers.get("/by-category/{category}", response_model=list[Influencer])
-async def get_influencers_by_category(category: str):
-    return showInfluencersCategory(category)
+async def get_influencers_by_category(category: CategoriaEnum):
+    return showInfluencersCategory(category.value)
 
 
 @router_influencers.get("/{influencer_id}", response_model=Influencer)
