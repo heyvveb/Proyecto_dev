@@ -12,6 +12,12 @@ async def get_all_suplementos():
     return suplementos
 
 
+
+@router_suplementos.get("/inactive", response_model=list[Suplemento])
+async def get_inactive_suplementos():
+    return showInactiveSuplementos()
+
+
 @router_suplementos.get("/by-type/{type}", response_model=list[Suplemento])
 async def get_suplementos_by_type(type: str):
     return showSuplementosType(type)
@@ -46,3 +52,10 @@ async def delete_suplemento(suplemento_id: int):
     deleted = deleteSuplemento(suplemento_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Suplemento not found")
+
+
+@router_suplementos.post("/{suplemento_id}/restore", response_model=Suplemento)
+async def restore_suplemento(suplemento_id: int):
+    restored = restoreSuplemento(suplemento_id)
+    if not restored:
+        raise HTTPException(status_code=404, detail="Suplemento not found or already active")

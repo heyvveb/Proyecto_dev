@@ -12,6 +12,11 @@ async def get_all_rutinas():
     return rutinas
 
 
+@router_rutinas.get("/deleted", response_model=list[Rutina])
+async def get_inactive_rutinas():
+    return showInactiveRutinas()
+
+
 @router_rutinas.get("/by-level/{level}", response_model=list[Rutina])
 async def get_rutinas_by_level(level: str):
     return showRutinasLevel(level)
@@ -46,3 +51,10 @@ async def delete_rutina(rutina_id: int):
     deleted = deleteRutina(rutina_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Rutina not found")
+
+
+@router_rutinas.post("/{rutina_id}/restore", response_model=Rutina)
+async def restore_rutina(rutina_id: int):
+    restored = restoreRutina(rutina_id)
+    if not restored:
+        raise HTTPException(status_code=404, detail="Rutina not found or already active")
