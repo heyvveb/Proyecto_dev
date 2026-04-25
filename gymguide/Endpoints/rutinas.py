@@ -1,0 +1,48 @@
+from fastapi import APIRouter, HTTPException, Query
+from typing import Optional
+from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
+from gymguide.Operaciones_CSV.rutina_OP import *
+
+
+router_rutinas = APIRouter(prefix="/rutinas", tags=["Rutinas"])
+
+@router_rutinas.get("", response_model=list[Rutina])
+async def get_all_rutinas():
+    rutinas=showRutinas()
+    return rutinas
+
+
+@router_rutinas.get("/by-level/{level}", response_model=list[Rutina])
+async def get_rutinas_by_level(level: str):
+    return showRutinasLevel(level)
+
+
+@router_rutinas.get("/{rutina_id}", response_model=Rutina)
+async def get_rutina(rutina_id: int):
+    rutina = showRutina_ID(rutina_id)
+    if not rutina:
+        raise HTTPException(status_code=404, detail="Rutina not found")
+    return rutina
+
+
+@router_rutinas.post("", response_model=Rutina, status_code=201)
+async def create_rutina(rutina: Rutina):
+    try:
+        return createRutina(rutina)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router_rutinas.patch("/{rutina_id}", response_model=Rutina)
+async def update_rutina(rutina_id: int, data: RutinaUpdate):
+    updated = updateRutina(rutina_id, data.model_dump(exclude_unset=True))
+    if not updated:
+        raise HTTPException(status_code=404, detail="Rutina not found")
+    return updated
+
+
+@router_rutinas.delete("/{rutina_id}", status_code=204)
+async def delete_rutina(rutina_id: int):
+    deleted = deleteRutina(rutina_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Rutina not found")
