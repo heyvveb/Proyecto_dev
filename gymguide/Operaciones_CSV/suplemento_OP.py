@@ -112,6 +112,18 @@ def showSuplementosType(type: str):
 
     return suplementos
 
+def showSuplementosName(name: str):
+    ensure_file()
+    suplementos = []
+
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if name.lower() in row['name'].lower() and row['status'] == 'active':
+                suplementos.append(SuplementoID(**row))
+
+    return suplementos
+
 def showInactiveSuplementos():
     ensure_file()
     with open(CSV_FILE) as csvfile:

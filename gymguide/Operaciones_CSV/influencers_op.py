@@ -119,6 +119,18 @@ def showInfluencersCategory(categoria: str):
 
     return influencers
 
+def showInfluencersName(name: str):
+    ensure_file()
+    influencers = []
+
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if name.lower() in row['name'].lower() and row['status'] == 'active':
+                influencers.append(InfluencerID(**row))
+
+    return influencers
+
 def showInactiveInfluencers():
     ensure_file()
     with open(CSV_FILE) as csvfile:
