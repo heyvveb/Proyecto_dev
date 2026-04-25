@@ -2,6 +2,7 @@ import os
 import csv
 from typing import Optional
 from gymguide.models.influencer import *
+from gymguide.Operaciones_CSV.rutina_OP import showRutina_ID
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "data", "Influencers.csv")
@@ -42,6 +43,9 @@ def saveInfluencerID(influencer:InfluencerID):
 
 def createInfluencer(influencer:Influencer):
     ensure_file()
+    if influencer.rutina_recomendada_id is not None:
+        if not showRutina_ID(influencer.rutina_recomendada_id):
+            raise ValueError(f"La rutina con ID {influencer.rutina_recomendada_id} no existe")
     id =newID()
     new_influencer=InfluencerID(id=id,**influencer.model_dump())
     saveInfluencerID(new_influencer)
@@ -68,6 +72,9 @@ def updateInfluencer(id:int,influencer:InfluencerUpdate):
     for num, influencer_ in enumerate(influencers):
         if influencer_.id==id:
             influencers[num]=(influencer_update)=influencer_.model_copy(update=influencer)
+    if influencer_update and influencer_update.rutina_recomendada_id is not None:
+        if not showRutina_ID(influencer_update.rutina_recomendada_id):
+            raise ValueError(f"La rutina con ID {influencer_update.rutina_recomendada_id} no existe")
     with open(CSV_FILE, mode="w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
         writer.writeheader()
