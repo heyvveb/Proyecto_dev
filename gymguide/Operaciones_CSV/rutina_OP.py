@@ -112,6 +112,18 @@ def showRutinasLevel(level: str):
 
     return rutinas
 
+def showRutinasObjective(objective: str):
+    ensure_file()
+    rutinas = []
+
+    with open(CSV_FILE) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row['objective'].lower() == objective.lower() and row['status'] == 'active':
+                rutinas.append(RutinaID(**row))
+
+    return rutinas
+
 def showInactiveRutinas():
     ensure_file()
     with open(CSV_FILE) as csvfile:
