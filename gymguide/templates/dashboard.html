@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="section-title"><h2>Dashboard <span class="glow-text">Estadístico</span></h2><span class="line"></span></div>
+
+    <div class="dashboard-grid">
+        <div class="dash-card"><div class="num" style="color:var(--cyan)">{{ istats.active }}</div><div class="label">Influencers Activos</div></div>
+        <div class="dash-card"><div class="num" style="color:#00ff88">{{ rstats.active }}</div><div class="label">Rutinas Activas</div></div>
+        <div class="dash-card"><div class="num" style="color:#ffaa00">{{ sstats.active }}</div><div class="label">Suplementos Activos</div></div>
+        <div class="dash-card"><div class="num" style="color:#ff66ff">{{ estats.active }}</div><div class="label">Ejercicios Activos</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px">
+        <div class="card">
+            <h3 style="font-size:18px;margin-bottom:16px">Influencers por <span class="glow-text">Categoría</span></h3>
+            {% if istats.by_category %}
+            <div class="bar-chart">
+                {% set max_cat = istats.by_category.values()|max %}
+                {% for cat, count in istats.by_category.items() %}
+                <div class="bar-item">
+                    <div class="bar-value">{{ count }}</div>
+                    <div class="bar" style="height:{{ (count / max_cat * 100)|int }}px"></div>
+                    <div class="bar-label">{{ cat[:8] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:20px"><p>Sin datos</p></div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:18px;margin-bottom:16px">Rutinas por <span class="glow-text">Nivel</span></h3>
+            {% if rstats.by_level %}
+            <div class="bar-chart">
+                {% set max_lv = rstats.by_level.values()|max %}
+                {% for lv, count in rstats.by_level.items() %}
+                <div class="bar-item">
+                    <div class="bar-value">{{ count }}</div>
+                    <div class="bar" style="height:{{ (count / max_lv * 100)|int }}px"></div>
+                    <div class="bar-label">{{ lv[:8] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:20px"><p>Sin datos</p></div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:18px;margin-bottom:16px">Rutinas por <span class="glow-text">Objetivo</span></h3>
+            {% if rstats.by_objective %}
+            <div class="bar-chart">
+                {% set max_ob = rstats.by_objective.values()|max %}
+                {% for ob, count in rstats.by_objective.items() %}
+                <div class="bar-item">
+                    <div class="bar-value">{{ count }}</div>
+                    <div class="bar" style="height:{{ (count / max_ob * 100)|int }}px"></div>
+                    <div class="bar-label">{{ ob[:8] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:20px"><p>Sin datos</p></div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:18px;margin-bottom:16px">Suplementos por <span class="glow-text">Tipo</span></h3>
+            {% if sstats.by_type %}
+            <div class="bar-chart">
+                {% set max_tp = sstats.by_type.values()|max %}
+                {% for tp, count in sstats.by_type.items() %}
+                <div class="bar-item">
+                    <div class="bar-value">{{ count }}</div>
+                    <div class="bar" style="height:{{ (count / max_tp * 100)|int }}px"></div>
+                    <div class="bar-label">{{ tp[:8] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:20px"><p>Sin datos</p></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="font-size:18px;margin-bottom:16px">Ejercicios por <span class="glow-text">Grupo Muscular</span></h3>
+        {% if estats.by_muscle %}
+        <div class="bar-chart" style="flex-wrap:wrap">
+            {% set max_mu = estats.by_muscle.values()|max %}
+            {% for mu, count in estats.by_muscle.items() %}
+            <div class="bar-item" style="min-width:60px">
+                <div class="bar-value">{{ count }}</div>
+                <div class="bar" style="height:{{ (count / max_mu * 100)|int }}px"></div>
+                <div class="bar-label">{{ mu[:8] }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:20px"><p>Sin datos</p></div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-grid" style="margin-top:24px">
+        <div class="dash-card"><div class="num" style="color:var(--gray-500)">{{ istats.inactive }}</div><div class="label">Influencers Inactivos</div></div>
+        <div class="dash-card"><div class="num" style="color:var(--gray-500)">{{ rstats.inactive }}</div><div class="label">Rutinas Inactivas</div></div>
+        <div class="dash-card"><div class="num" style="color:var(--gray-500)">{{ sstats.inactive }}</div><div class="label">Suplementos Inactivos</div></div>
+        <div class="dash-card"><div class="num" style="color:var(--gray-500)">{{ estats.inactive }}</div><div class="label">Ejercicios Inactivos</div></div>
+    </div>
+</div>
+{% endblock %}

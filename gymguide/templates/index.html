@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-section">
+    <div class="floating-icons">
+        <span class="float-icon" style="top:15%;left:10%;animation:float1 3s ease-in-out infinite">🏋️</span>
+        <span class="float-icon" style="top:25%;right:15%;animation:float2 2.5s ease-in-out infinite">❤️</span>
+        <span class="float-icon" style="bottom:30%;left:20%;animation:float3 3.5s ease-in-out infinite">🧠</span>
+        <span class="float-icon" style="top:40%;right:25%;animation:float1 2.8s ease-in-out infinite">💪</span>
+        <span class="float-icon" style="bottom:20%;right:10%;animation:float2 3.2s ease-in-out infinite">🔥</span>
+        <span class="float-icon" style="top:60%;left:5%;animation:float3 2.2s ease-in-out infinite">⚡</span>
+    </div>
+    <div class="hero-badge"><span class="dot"></span> v2.0 — Quantum Interface</div>
+    <h1 class="hero-title">
+        <span class="line1">Fitness<br></span>
+        <span class="line2">Management System</span>
+    </h1>
+    <p class="hero-sub">Plataforma integral para la gestión de influencers, rutinas, suplementos y ejercicios con interfaz cuántica.</p>
+    <div style="display:flex;gap:16px;margin-top:32px">
+        <a href="/influencers" class="cyber-btn">Explorar</a>
+        <a href="/dashboard" class="cyber-btn cyber-btn-outline">Dashboard</a>
+    </div>
+    <div class="stat-strip">
+        <div class="stat-item">
+            <div class="num">{{ istats.active }}</div>
+            <div class="label">Influencers</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">{{ rstats.active }}</div>
+            <div class="label">Rutinas</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">{{ sstats.active }}</div>
+            <div class="label">Suplementos</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">{{ estats.active }}</div>
+            <div class="label">Ejercicios</div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="section-title"><h2>Modulos del <span class="glow-text">Sistema</span></h2><span class="line"></span></div>
+    <div class="grid-4">
+        <div class="card" style="text-align:center">
+            <div style="font-size:48px;margin-bottom:16px;transition:transform 0.4s var(--easing)">🏋️</div>
+            <h3 style="font-size:18px;margin-bottom:8px">Influencers</h3>
+            <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Gestiona influencers fitness, sus logros y rutinas recomendadas.</p>
+            <a href="/influencers" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
+        </div>
+        <div class="card" style="text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">📋</div>
+            <h3 style="font-size:18px;margin-bottom:8px">Rutinas</h3>
+            <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Crea y administra rutinas de entrenamiento por nivel y objetivo.</p>
+            <a href="/rutinas" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
+        </div>
+        <div class="card" style="text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">💊</div>
+            <h3 style="font-size:18px;margin-bottom:8px">Suplementos</h3>
+            <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Catálogo de suplementos con marcas y beneficios.</p>
+            <a href="/suplementos" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
+        </div>
+        <div class="card" style="text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">🎯</div>
+            <h3 style="font-size:18px;margin-bottom:8px">Ejercicios</h3>
+            <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Biblioteca de ejercicios por grupo muscular.</p>
+            <a href="/ejercicios" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes float1 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    @keyframes float2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes float3 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+</style>
+{% endblock %}
