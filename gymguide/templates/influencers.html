@@ -38,7 +38,7 @@
             </thead>
             <tbody id="influencersTable">
                 {% for inf in influencers %}
-                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria|lower.value }}" data-status="{{ inf.status }}">
+                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}" data-status="{{ inf.status }}">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
