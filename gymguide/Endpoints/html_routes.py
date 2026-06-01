@@ -16,7 +16,9 @@ import os
 
 router_html = APIRouter(tags=["Pages"])
 
-templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates"))
+templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
+print(f"[GYMGUIDE] Templates directory: {os.path.abspath(templates_dir)}")
+templates = Jinja2Templates(directory=templates_dir, auto_reload=False)
 
 
 @router_html.get("/", response_class=HTMLResponse)
