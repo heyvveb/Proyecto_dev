@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="flex-between mb-24">
+        <div class="section-title" style="margin:0"><h2>Suplementos</h2><span class="line"></span></div>
+        <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+    </div>
+    <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <select id="filterType" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos tipos</option>
+            <option value="proteina">Proteina</option>
+            <option value="creatina">Creatina</option>
+            <option value="pre-entreno">Pre-Entreno</option>
+            <option value="amino acidos">Amino acidos</option>
+            <option value="vitaminas">Vitaminas</option>
+            <option value="fat burner">Fat burner</option>
+        </select>
+        <select id="filterStatus" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+        </select>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Status</th><th>Acciones</th></tr></thead>
+            <tbody id="tableBody">
+                {% for s in suplementos %}
+                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}" data-status="{{ s.status }}">
+                    <td><span class="mono-label">{{ s.id }}</span></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">💊</div>{% endif %}
+                            <strong>{{ s.name }}</strong>
+                        </div>
+                    </td>
+                    <td><span class="tag">{{ s.type }}</span></td>
+                    <td>{{ s.brand }}</td>
+                    <td><span class="mono-label">{% if s.price %}${{ s.price }}{% else %}—{% endif %}</span></td>
+                    <td><span class="badge {% if s.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ s.status }}</span></td>
+                    <td>
+                        <div class="action-group">
+                            <button class="btn-icon edit" onclick="editItem({{ s.id }})">✎ Editar</button>
+                            {% if s.status == 'active' %}
+                            <button class="btn-icon delete" onclick="deleteItem({{ s.id }})">✕ Eliminar</button>
+                            {% else %}
+                            <button class="btn-icon restore" onclick="restoreItem({{ s.id }})">↺ Restaurar</button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7"><div class="empty-state"><h3>Sin suplementos</h3><p>No hay suplementos registrados aún.</p></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-overlay" id="createModal"><div class="modal">
+    <button class="modal-close" onclick="closeModal('createModal')">✕</button>
+    <h2>Nuevo <span class="glow-text">Suplemento</span></h2>
+    <form id="createForm" onsubmit="return createItem(event)">
+        <div class="form-group"><label>Nombre</label><input name="name" required></div>
+        <div class="form-group"><label>Tipo</label><select name="type" required><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
+        <div class="form-group"><label>Marca</label><input name="brand" required></div>
+        <div class="form-group"><label>Beneficios</label><textarea name="benefits" rows="2"></textarea></div>
+        <div class="form-group"><label>Precio ($)</label><input name="price" type="number" min="0" step="0.01"></div>
+        <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+        <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
+    </form>
+</div></div>
+
+<div class="modal-overlay" id="editModal"><div class="modal">
+    <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    <h2>Editar <span class="glow-text">Suplemento</span></h2>
+    <form id="editForm" onsubmit="return updateItem(event)">
+        <input type="hidden" id="edit_id">
+        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required></div>
+        <div class="form-group"><label>Tipo</label><select id="edit_type" name="type"><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
+        <div class="form-group"><label>Marca</label><input id="edit_brand" name="brand" required></div>
+        <div class="form-group"><label>Beneficios</label><textarea id="edit_benefits" name="benefits" rows="2"></textarea></div>
+        <div class="form-group"><label>Precio ($)</label><input id="edit_price" name="price" type="number" min="0" step="0.01"></div>
+        <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
+        <div class="form-group"><label>Status</label><select id="edit_status" name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+        <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
+    </form>
+</div></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ENTITY = 'suplementos';
+    async function createItem(e) {
+        e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
+        if (data.price) data.price = parseFloat(data.price); else data.price = null;
+        if (!data.image_url) data.image_url = null;
+        try { await api('POST', '/' + ENTITY, data); showToast('Suplemento creado'); closeModal('createModal'); setTimeout(() => location.reload(), 500); }
+        catch (err) { showToast(err.message, 'error'); }
+    }
+    async function editItem(id) {
+        try { const d = await api('GET', '/' + ENTITY + '/' + id);
+            document.getElementById('edit_id').value = d.id; document.getElementById('edit_name').value = d.name;
+            document.getElementById('edit_type').value = d.type; document.getElementById('edit_brand').value = d.brand;
+            document.getElementById('edit_benefits').value = d.benefits || '';
+            document.getElementById('edit_price').value = d.price || ''; document.getElementById('edit_image_url').value = d.image_url || '';
+            document.getElementById('edit_status').value = d.status; openModal('editModal');
+        } catch (err) { showToast(err.message, 'error'); }
+    }
+    async function updateItem(e) {
+        e.preventDefault(); const id = document.getElementById('edit_id').value;
+        const fd = new FormData(e.target); const data = Object.fromEntries(fd); delete data.id;
+        if (data.price) data.price = parseFloat(data.price); else data.price = null;
+        if (!data.image_url) data.image_url = null;
+        try { await api('PATCH', '/' + ENTITY + '/' + id, data); showToast('Suplemento actualizado'); closeModal('editModal'); setTimeout(() => location.reload(), 500); }
+        catch (err) { showToast(err.message, 'error'); }
+    }
+    async function deleteItem(id) { if (!confirm('¿Eliminar este suplemento?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Suplemento desactivado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Suplemento restaurado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    document.getElementById('searchInput')?.addEventListener('input', filterTable);
+    document.getElementById('filterType')?.addEventListener('change', filterTable);
+    document.getElementById('filterStatus')?.addEventListener('change', filterTable);
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const tp = document.getElementById('filterType').value.toLowerCase();
+        const st = document.getElementById('filterStatus').value;
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            const name = (tr.dataset.name || '').toLowerCase();
+            const type = (tr.dataset.type || '').toLowerCase();
+            const status = tr.dataset.status || '';
+            tr.style.display = (!q || name.includes(q)) && (!tp || type === tp) && (!st || status === st) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}
