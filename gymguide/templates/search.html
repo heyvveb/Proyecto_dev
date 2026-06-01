@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="section-title"><h2>Resultados de <span class="glow-text">Búsqueda</span></h2><span class="line"></span></div>
+    <p style="color:var(--gray-400);margin-bottom:24px;font-family:'JetBrains Mono',monospace;font-size:13px">
+        Buscaste: "{{ q }}" — 
+        {% set total = results.influencers|length + results.rutinas|length + results.suplementos|length + results.ejercicios|length %}
+        {{ total }} resultado(s)
+    </p>
+
+    {% if results.influencers %}
+    <div class="card mb-24">
+        <h3 style="font-size:18px;margin-bottom:16px">🏋️ Influencers</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for r in results.influencers %}
+                    <tr><td><span class="mono-label">{{ r.id }}</span></td><td><strong>{{ r.name }}</strong></td><td><span class="tag">{{ r.categoria }}</span></td><td><span class="badge {% if r.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ r.status }}</span></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.rutinas %}
+    <div class="card mb-24">
+        <h3 style="font-size:18px;margin-bottom:16px">📋 Rutinas</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for r in results.rutinas %}
+                    <tr><td><span class="mono-label">{{ r.id }}</span></td><td><strong>{{ r.name }}</strong></td><td><span class="tag">{{ r.level }}</span></td><td>{{ r.objective }}</td><td><span class="badge {% if r.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ r.status }}</span></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.suplementos %}
+    <div class="card mb-24">
+        <h3 style="font-size:18px;margin-bottom:16px">💊 Suplementos</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for r in results.suplementos %}
+                    <tr><td><span class="mono-label">{{ r.id }}</span></td><td><strong>{{ r.name }}</strong></td><td><span class="tag">{{ r.type }}</span></td><td>{{ r.brand }}</td><td><span class="badge {% if r.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ r.status }}</span></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.ejercicios %}
+    <div class="card mb-24">
+        <h3 style="font-size:18px;margin-bottom:16px">🎯 Ejercicios</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series x Reps</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for r in results.ejercicios %}
+                    <tr><td><span class="mono-label">{{ r.id }}</span></td><td><strong>{{ r.name }}</strong></td><td><span class="tag">{{ r.grupo_muscular }}</span></td><td><span class="mono-label">{{ r.series }}x{{ r.repeticiones }}</span></td><td><span class="badge {% if r.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ r.status }}</span></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if total == 0 and q %}
+    <div class="empty-state"><h3>Sin resultados</h3><p>No se encontraron resultados para "{{ q }}"</p></div>
+    {% endif %}
+</div>
+{% endblock %}

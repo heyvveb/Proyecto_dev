@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="flex-between mb-24">
+        <div class="section-title" style="margin:0"><h2>Ejercicios</h2><span class="line"></span></div>
+        <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+    </div>
+    <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <select id="filterMuscle" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos grupos</option>
+            <option value="pecho">Pecho</option>
+            <option value="espalda">Espalda</option>
+            <option value="hombros">Hombros</option>
+            <option value="biceps">Biceps</option>
+            <option value="triceps">Triceps</option>
+            <option value="piernas">Piernas</option>
+            <option value="gluteos">Gluteos</option>
+            <option value="abdominales">Abdominales</option>
+            <option value="cardiovascular">Cardiovascular</option>
+        </select>
+        <select id="filterStatus" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+        </select>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Status</th><th>Acciones</th></tr></thead>
+            <tbody id="tableBody">
+                {% for e in ejercicios %}
+                <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}" data-status="{{ e.status }}">
+                    <td><span class="mono-label">{{ e.id }}</span></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">🎯</div>{% endif %}
+                            <strong>{{ e.name }}</strong>
+                        </div>
+                    </td>
+                    <td><span class="tag">{{ e.grupo_muscular }}</span></td>
+                    <td><span class="mono-label">{{ e.series }}</span></td>
+                    <td><span class="mono-label">{{ e.repeticiones }}</span></td>
+                    <td><span class="mono-label">{{ e.descanso_segundos }}s</span></td>
+                    <td><span class="badge {% if e.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ e.status }}</span></td>
+                    <td>
+                        <div class="action-group">
+                            <button class="btn-icon edit" onclick="editItem({{ e.id }})">✎ Editar</button>
+                            {% if e.status == 'active' %}
+                            <button class="btn-icon delete" onclick="deleteItem({{ e.id }})">✕ Eliminar</button>
+                            {% else %}
+                            <button class="btn-icon restore" onclick="restoreItem({{ e.id }})">↺ Restaurar</button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8"><div class="empty-state"><h3>Sin ejercicios</h3><p>No hay ejercicios registrados aún.</p></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-overlay" id="createModal"><div class="modal">
+    <button class="modal-close" onclick="closeModal('createModal')">✕</button>
+    <h2>Nuevo <span class="glow-text">Ejercicio</span></h2>
+    <form id="createForm" onsubmit="return createItem(event)">
+        <div class="form-group"><label>Nombre</label><input name="name" required></div>
+        <div class="form-group"><label>Grupo Muscular</label>
+            <select name="grupo_muscular" required>
+                <option value="Pecho">Pecho</option><option value="Espalda">Espalda</option>
+                <option value="Hombros">Hombros</option><option value="Biceps">Biceps</option>
+                <option value="Triceps">Triceps</option><option value="Piernas">Piernas</option>
+                <option value="Gluteos">Gluteos</option><option value="Abdominales">Abdominales</option>
+                <option value="Cardiovascular">Cardiovascular</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Descripción</label><textarea name="descripcion" rows="2"></textarea></div>
+        <div class="form-group"><label>Series</label><input name="series" type="number" min="1" max="20" value="3"></div>
+        <div class="form-group"><label>Repeticiones</label><input name="repeticiones" type="number" min="1" max="100" value="10"></div>
+        <div class="form-group"><label>Descanso (segundos)</label><input name="descanso_segundos" type="number" min="0" max="600" value="60"></div>
+        <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+        <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
+    </form>
+</div></div>
+
+<div class="modal-overlay" id="editModal"><div class="modal">
+    <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    <h2>Editar <span class="glow-text">Ejercicio</span></h2>
+    <form id="editForm" onsubmit="return updateItem(event)">
+        <input type="hidden" id="edit_id">
+        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required></div>
+        <div class="form-group"><label>Grupo Muscular</label>
+            <select id="edit_grupo_muscular" name="grupo_muscular">
+                <option value="Pecho">Pecho</option><option value="Espalda">Espalda</option>
+                <option value="Hombros">Hombros</option><option value="Biceps">Biceps</option>
+                <option value="Triceps">Triceps</option><option value="Piernas">Piernas</option>
+                <option value="Gluteos">Gluteos</option><option value="Abdominales">Abdominales</option>
+                <option value="Cardiovascular">Cardiovascular</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Descripción</label><textarea id="edit_descripcion" name="descripcion" rows="2"></textarea></div>
+        <div class="form-group"><label>Series</label><input id="edit_series" name="series" type="number" min="1" max="20"></div>
+        <div class="form-group"><label>Repeticiones</label><input id="edit_repeticiones" name="repeticiones" type="number" min="1" max="100"></div>
+        <div class="form-group"><label>Descanso (segundos)</label><input id="edit_descanso_segundos" name="descanso_segundos" type="number" min="0" max="600"></div>
+        <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
+        <div class="form-group"><label>Status</label><select id="edit_status" name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+        <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
+    </form>
+</div></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ENTITY = 'ejercicios';
+    async function createItem(e) {
+        e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
+        data.series = parseInt(data.series); data.repeticiones = parseInt(data.repeticiones); data.descanso_segundos = parseInt(data.descanso_segundos);
+        if (!data.image_url) data.image_url = null;
+        try { await api('POST', '/' + ENTITY, data); showToast('Ejercicio creado'); closeModal('createModal'); setTimeout(() => location.reload(), 500); }
+        catch (err) { showToast(err.message, 'error'); }
+    }
+    async function editItem(id) {
+        try { const d = await api('GET', '/' + ENTITY + '/' + id);
+            document.getElementById('edit_id').value = d.id; document.getElementById('edit_name').value = d.name;
+            document.getElementById('edit_grupo_muscular').value = d.grupo_muscular; document.getElementById('edit_descripcion').value = d.descripcion || '';
+            document.getElementById('edit_series').value = d.series; document.getElementById('edit_repeticiones').value = d.repeticiones;
+            document.getElementById('edit_descanso_segundos').value = d.descanso_segundos; document.getElementById('edit_image_url').value = d.image_url || '';
+            document.getElementById('edit_status').value = d.status; openModal('editModal');
+        } catch (err) { showToast(err.message, 'error'); }
+    }
+    async function updateItem(e) {
+        e.preventDefault(); const id = document.getElementById('edit_id').value;
+        const fd = new FormData(e.target); const data = Object.fromEntries(fd); delete data.id;
+        data.series = parseInt(data.series); data.repeticiones = parseInt(data.repeticiones); data.descanso_segundos = parseInt(data.descanso_segundos);
+        if (!data.image_url) data.image_url = null;
+        try { await api('PATCH', '/' + ENTITY + '/' + id, data); showToast('Ejercicio actualizado'); closeModal('editModal'); setTimeout(() => location.reload(), 500); }
+        catch (err) { showToast(err.message, 'error'); }
+    }
+    async function deleteItem(id) { if (!confirm('¿Eliminar este ejercicio?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Ejercicio desactivado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Ejercicio restaurado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    document.getElementById('searchInput')?.addEventListener('input', filterTable);
+    document.getElementById('filterMuscle')?.addEventListener('change', filterTable);
+    document.getElementById('filterStatus')?.addEventListener('change', filterTable);
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const mu = document.getElementById('filterMuscle').value.toLowerCase();
+        const st = document.getElementById('filterStatus').value;
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            const name = (tr.dataset.name || '').toLowerCase();
+            const muscle = (tr.dataset.muscle || '').toLowerCase();
+            const status = tr.dataset.status || '';
+            tr.style.display = (!q || name.includes(q)) && (!mu || muscle === mu) && (!st || status === st) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}
