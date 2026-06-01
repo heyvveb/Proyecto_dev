@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.ext.asyncio import AsyncSession
 from gymguide.database import get_db
 from gymguide.Operaciones.influencers_op import get_influencer_stats
@@ -18,9 +18,16 @@ router_html = APIRouter(tags=["Pages"])
 
 templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
 print(f"[GYMGUIDE] Templates directory: {os.path.abspath(templates_dir)}")
-templates = Jinja2Templates(directory=templates_dir)
-templates.env.auto_reload = False
-templates.env.cache = None
+jinja_env = Environment(
+    loader=FileSystemLoader(templates_dir),
+    auto_reload=False
+)
+jinja_env.cache = None
+
+
+def render(name: str, context: dict) -> HTMLResponse:
+    template = jinja_env.get_template(name)
+    return HTMLResponse(template.render(**context))
 
 
 @router_html.get("/", response_class=HTMLResponse)
@@ -29,7 +36,7 @@ async def index(request: Request, db: AsyncSession = Depends(get_db)):
     rstats = await get_rutina_stats(db)
     sstats = await get_suplemento_stats(db)
     estats = await get_ejercicio_stats(db)
-    return templates.TemplateResponse("index.html", {
+    return render("index.html", {
         "request": request,
         "istats": istats,
         "rstats": rstats,
@@ -42,7 +49,7 @@ async def index(request: Request, db: AsyncSession = Depends(get_db)):
 @router_html.get("/influencers", response_class=HTMLResponse)
 async def influencers_page(request: Request, db: AsyncSession = Depends(get_db)):
     influencers = await showInfluencers(db, include_inactive=True)
-    return templates.TemplateResponse("influencers.html", {
+    return render("influencers.html", {
         "request": request,
         "influencers": influencers
     })
@@ -51,7 +58,7 @@ async def influencers_page(request: Request, db: AsyncSession = Depends(get_db))
 @router_html.get("/rutinas", response_class=HTMLResponse)
 async def rutinas_page(request: Request, db: AsyncSession = Depends(get_db)):
     rutinas = await showRutinas(db, include_inactive=True)
-    return templates.TemplateResponse("rutinas.html", {
+    return render("rutinas.html", {
         "request": request,
         "rutinas": rutinas
     })
@@ -60,7 +67,7 @@ async def rutinas_page(request: Request, db: AsyncSession = Depends(get_db)):
 @router_html.get("/suplementos", response_class=HTMLResponse)
 async def suplementos_page(request: Request, db: AsyncSession = Depends(get_db)):
     suplementos = await showSuplementos(db, include_inactive=True)
-    return templates.TemplateResponse("suplementos.html", {
+    return render("suplementos.html", {
         "request": request,
         "suplementos": suplementos
     })
@@ -69,7 +76,7 @@ async def suplementos_page(request: Request, db: AsyncSession = Depends(get_db))
 @router_html.get("/ejercicios", response_class=HTMLResponse)
 async def ejercicios_page(request: Request, db: AsyncSession = Depends(get_db)):
     ejercicios = await showEjercicios(db, include_inactive=True)
-    return templates.TemplateResponse("ejercicios.html", {
+    return render("ejercicios.html", {
         "request": request,
         "ejercicios": ejercicios
     })
@@ -81,7 +88,7 @@ async def dashboard_page(request: Request, db: AsyncSession = Depends(get_db)):
     rstats = await get_rutina_stats(db)
     sstats = await get_suplemento_stats(db)
     estats = await get_ejercicio_stats(db)
-    return templates.TemplateResponse("dashboard.html", {
+    return render("dashboard.html", {
         "request": request,
         "istats": istats,
         "rstats": rstats,
@@ -98,7 +105,7 @@ async def search_page(request: Request, q: str = "", db: AsyncSession = Depends(
         results["rutinas"] = await showRutinasName(db, q)
         results["suplementos"] = await showSuplementosName(db, q)
         results["ejercicios"] = await showEjerciciosName(db, q)
-    return templates.TemplateResponse("search.html", {
+    return render("search.html", {
         "request": request,
         "q": q,
         "results": results
