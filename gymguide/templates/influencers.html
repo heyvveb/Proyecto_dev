@@ -17,9 +17,9 @@
             <option value="yoga">Yoga</option>
         </select>
         <select id="filterStatus" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
-            <option value="">Todos</option>
             <option value="active">Activos</option>
             <option value="inactive">Inactivos</option>
+            <option value="">Todos</option>
         </select>
     </div>
 
@@ -38,7 +38,7 @@
             </thead>
             <tbody id="influencersTable">
                 {% for inf in influencers %}
-                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria|lower }}" data-status="{{ inf.status }}">
+                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria|lower.value }}" data-status="{{ inf.status }}">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
