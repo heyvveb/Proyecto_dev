@@ -16,7 +16,7 @@ class ObjectiveEnum(str, Enum):
     Ganancia_Muscular = "Ganancia Muscular"
     Perdida_de_grasa = "Perdida de grasa"
     Fuerza = "Fuerza"
-    Resitencia = "Resitencia"
+    Resistencia = "Resistencia"
 
 class TipoSuplementoEnum(str, Enum):
     Proteina = "Proteina"
@@ -25,3 +25,14 @@ class TipoSuplementoEnum(str, Enum):
     Amino_acidos = "Amino acidos"
     Vitaminas = "Vitaminas"
     Fat_burner = "Fat burner"
+
+class GrupoMuscularEnum(str, Enum):
+    Pecho = "Pecho"
+    Espalda = "Espalda"
+    Hombros = "Hombros"
+    Biceps = "Biceps"
+    Triceps = "Triceps"
+    Piernas = "Piernas"
+    Gluteos = "Gluteos"
+    Abdominales = "Abdominales"
+    Cardiovascular = "Cardiovascular"
