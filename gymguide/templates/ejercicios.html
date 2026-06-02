@@ -33,7 +33,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for e in ejercicios %}
-                <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}" onclick="window.location='/ejercicios/{{ e.id }}'" style="cursor:pointer">
+                <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}" onclick="gotoItem({{ e.id }}, '{{ e.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ e.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -115,6 +115,11 @@
 {% block scripts %}
 <script>
     const ENTITY = 'ejercicios';
+    function gotoItem(id, status) {
+        if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
+        window.location = '/' + ENTITY + '/' + id;
+    }
+
     async function createItem(e) {
         e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
         data.series = parseInt(data.series); data.repeticiones = parseInt(data.repeticiones); data.descanso_segundos = parseInt(data.descanso_segundos);

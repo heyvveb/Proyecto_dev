@@ -30,7 +30,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Ejercicios</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for r in rutinas %}
-                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}" onclick="window.location='/rutinas/{{ r.id }}'" style="cursor:pointer">
+                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}" onclick="gotoItem({{ r.id }}, '{{ r.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ r.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -113,6 +113,11 @@
 
     function getCheckedEjercicioIds() {
         return Array.from(document.querySelectorAll('.ej-checkbox:checked')).map(cb => parseInt(cb.value));
+    }
+
+    function gotoItem(id, status) {
+        if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
+        window.location = '/' + ENTITY + '/' + id;
     }
 
     async function createItem(e) {

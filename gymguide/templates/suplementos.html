@@ -30,7 +30,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for s in suplementos %}
-                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}" onclick="window.location='/suplementos/{{ s.id }}'" style="cursor:pointer">
+                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}" onclick="gotoItem({{ s.id }}, '{{ s.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ s.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -93,6 +93,11 @@
 {% block scripts %}
 <script>
     const ENTITY = 'suplementos';
+    function gotoItem(id, status) {
+        if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
+        window.location = '/' + ENTITY + '/' + id;
+    }
+
     async function createItem(e) {
         e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
         if (data.price) data.price = parseFloat(data.price); else data.price = null;
