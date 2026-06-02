@@ -27,7 +27,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for r in rutinas %}
-                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}">
+                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}" onclick="window.location='/rutinas/{{ r.id }}'" style="cursor:pointer">
                     <td><span class="mono-label">{{ r.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -40,11 +40,11 @@
                     <td><span class="mono-label">{{ r.duration_weeks }} sem</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="editItem({{ r.id }})">✎ Editar</button>
+                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ r.id }})">✎ Editar</button>
                             {% if r.status == 'active' %}
-                            <button class="btn-icon delete" onclick="deleteItem({{ r.id }})">✕ Eliminar</button>
+                            <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ r.id }})">✕ Eliminar</button>
                             {% else %}
-                            <button class="btn-icon restore" onclick="restoreItem({{ r.id }})">↺ Restaurar</button>
+                            <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ r.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>

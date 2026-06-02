@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <a href="/rutinas" class="cyber-btn cyber-btn-outline cyber-btn-sm mb-24" style="display:inline-flex;align-items:center;gap:6px">← Volver a Rutinas</a>
+
+    <div class="card">
+        <div class="flex-between" style="align-items:flex-start">
+            <div style="display:flex;align-items:center;gap:16px">
+                {% if rut.image_url %}
+                <img src="{{ rut.image_url }}" alt="" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
+                {% endif %}
+                <div>
+                    <h2 style="margin:0 0 4px">{{ rut.name }}</h2>
+                    <span class="tag">{{ rut.level }}</span>
+                    <span class="tag">{{ rut.objective }}</span>
+                    <span class="badge {% if rut.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ rut.status }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+            <div class="detail-field">
+                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Duración</span>
+                <span class="detail-value" style="color:var(--text);font-size:14px">{{ rut.duration_weeks }} semanas</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-24">
+        <h3 style="margin:0 0 16px;font-size:16px">Ejercicios <span class="mono-label" style="font-size:12px">{{ ejercicios|length }}</span></h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th></tr></thead>
+                <tbody>
+                    {% for e in ejercicios %}
+                    <tr>
+                        <td><span class="mono-label">{{ e.id }}</span></td>
+                        <td><a href="/ejercicios/{{ e.id }}" style="color:var(--cyan)">{{ e.name }}</a></td>
+                        <td><span class="tag">{{ e.grupo_muscular }}</span></td>
+                        <td><span class="mono-label">{{ e.series }}</span></td>
+                        <td><span class="mono-label">{{ e.repeticiones }}</span></td>
+                        <td><span class="mono-label">{{ e.descanso_segundos }}s</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6"><div class="empty-state"><p>Sin ejercicios en esta rutina</p></div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mt-24">
+        <h3 style="margin:0 0 16px;font-size:16px">Influencers que recomiendan esta rutina <span class="mono-label" style="font-size:12px">{{ influencers|length }}</span></h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th></tr></thead>
+                <tbody>
+                    {% for inf in influencers %}
+                    <tr>
+                        <td><span class="mono-label">{{ inf.id }}</span></td>
+                        <td><a href="/influencers/{{ inf.id }}" style="color:var(--cyan)">{{ inf.name }}</a></td>
+                        <td><span class="tag">{{ inf.categoria }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3"><div class="empty-state"><p>Ningún influencer recomienda esta rutina</p></div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

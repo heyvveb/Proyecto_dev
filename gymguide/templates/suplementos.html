@@ -30,7 +30,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for s in suplementos %}
-                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}">
+                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}" onclick="window.location='/suplementos/{{ s.id }}'" style="cursor:pointer">
                     <td><span class="mono-label">{{ s.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -43,11 +43,11 @@
                     <td><span class="mono-label">{% if s.price %}${{ s.price }}{% else %}—{% endif %}</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="editItem({{ s.id }})">✎ Editar</button>
+                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ s.id }})">✎ Editar</button>
                             {% if s.status == 'active' %}
-                            <button class="btn-icon delete" onclick="deleteItem({{ s.id }})">✕ Eliminar</button>
+                            <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ s.id }})">✕ Eliminar</button>
                             {% else %}
-                            <button class="btn-icon restore" onclick="restoreItem({{ s.id }})">↺ Restaurar</button>
+                            <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ s.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>

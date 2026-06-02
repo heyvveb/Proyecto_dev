@@ -40,7 +40,7 @@
             </thead>
             <tbody id="influencersTable">
                 {% for inf in influencers %}
-                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}">
+                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}" onclick="window.location='/influencers/{{ inf.id }}'" style="cursor:pointer">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -57,11 +57,11 @@
                     <td><span class="mono-label">{{ inf.rutina_recomendada_nombre or '—' }}</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="editInfluencer({{ inf.id }})">✎ Editar</button>
+                            <button class="btn-icon edit" onclick="event.stopPropagation();editInfluencer({{ inf.id }})">✎ Editar</button>
                             {% if inf.status == 'active' %}
-                            <button class="btn-icon delete" onclick="deleteInfluencer({{ inf.id }})">✕ Eliminar</button>
+                            <button class="btn-icon delete" onclick="event.stopPropagation();deleteInfluencer({{ inf.id }})">✕ Eliminar</button>
                             {% else %}
-                            <button class="btn-icon restore" onclick="restoreInfluencer({{ inf.id }})">↺ Restaurar</button>
+                            <button class="btn-icon restore" onclick="event.stopPropagation();restoreInfluencer({{ inf.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>

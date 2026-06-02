@@ -1,7 +1,10 @@
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from gymguide.models.models_sql import RutinaModel
+from sqlalchemy.orm import selectinload
+from gymguide.models.models_sql import RutinaModel, EjercicioModel, InfluencerModel
 from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
+from gymguide.models.ejercicio import EjercicioID
+from gymguide.models.influencer import InfluencerID
 from typing import Optional
 
 
@@ -105,6 +108,41 @@ async def get_rutina_stats(db: AsyncSession) -> dict:
             by_level[r.level] = by_level.get(r.level, 0) + 1
             by_objective[r.objective] = by_objective.get(r.objective, 0) + 1
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_level": by_level, "by_objective": by_objective}
+
+
+async def get_rutina_ejercicios(db: AsyncSession, rutina_id: int) -> list[EjercicioID]:
+    result = await db.execute(
+        select(RutinaModel).options(selectinload(RutinaModel.ejercicios)).where(RutinaModel.id == rutina_id)
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return []
+    return [EjercicioID(
+        id=e.id, name=e.name, grupo_muscular=e.grupo_muscular,
+        descripcion=e.descripcion or "", series=e.series,
+        repeticiones=e.repeticiones, descanso_segundos=e.descanso_segundos,
+        image_url=e.image_url or "", status=e.status
+    ) for e in (row.ejercicios or []) if e.status == "active"]
+
+
+async def get_rutina_influencers(db: AsyncSession, rutina_id: int) -> list[InfluencerID]:
+    result = await db.execute(
+        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(
+            InfluencerModel.rutina_recomendada_id == rutina_id, InfluencerModel.status == "active"
+        )
+    )
+    rows = result.scalars().all()
+    out = []
+    for r in rows:
+        rutina_nombre = r.rutina_recomendada.name if r.rutina_recomendada else None
+        out.append(InfluencerID(
+            id=r.id, name=r.name, categoria=r.categoria,
+            logros=r.logros or "", red_social=r.red_social or "",
+            rutina_recomendada_id=r.rutina_recomendada_id,
+            rutina_recomendada_nombre=rutina_nombre,
+            image_url=r.image_url or "", status=r.status
+        ))
+    return out
 
 
 def _row_to_id(row: RutinaModel) -> RutinaID:

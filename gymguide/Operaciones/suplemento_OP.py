@@ -1,7 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from gymguide.models.models_sql import SuplementoModel
+from sqlalchemy.orm import selectinload
+from gymguide.models.models_sql import SuplementoModel, InfluencerModel
 from gymguide.models.suplemento import Suplemento, SuplementoID, SuplementoUpdate
+from gymguide.models.influencer import InfluencerID
 from typing import Optional
 
 
@@ -96,6 +98,28 @@ async def get_suplemento_stats(db: AsyncSession) -> dict:
         if r.status == "active":
             by_type[r.type] = by_type.get(r.type, 0) + 1
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_type": by_type}
+
+
+async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> list[InfluencerID]:
+    result = await db.execute(
+        select(SuplementoModel).options(selectinload(SuplementoModel.influencers)).where(SuplementoModel.id == suplemento_id)
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return []
+    out = []
+    for inf in (row.influencers or []):
+        if inf.status != "active":
+            continue
+        rutina_nombre = inf.rutina_recomendada.name if inf.rutina_recomendada else None
+        out.append(InfluencerID(
+            id=inf.id, name=inf.name, categoria=inf.categoria,
+            logros=inf.logros or "", red_social=inf.red_social or "",
+            rutina_recomendada_id=inf.rutina_recomendada_id,
+            rutina_recomendada_nombre=rutina_nombre,
+            image_url=inf.image_url or "", status=inf.status
+        ))
+    return out
 
 
 def _row_to_id(row: SuplementoModel) -> SuplementoID:

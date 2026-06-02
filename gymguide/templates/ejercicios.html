@@ -33,7 +33,7 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for e in ejercicios %}
-                <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}">
+                <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}" onclick="window.location='/ejercicios/{{ e.id }}'" style="cursor:pointer">
                     <td><span class="mono-label">{{ e.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -47,11 +47,11 @@
                     <td><span class="mono-label">{{ e.descanso_segundos }}s</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="editItem({{ e.id }})">✎ Editar</button>
+                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ e.id }})">✎ Editar</button>
                             {% if e.status == 'active' %}
-                            <button class="btn-icon delete" onclick="deleteItem({{ e.id }})">✕ Eliminar</button>
+                            <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ e.id }})">✕ Eliminar</button>
                             {% else %}
-                            <button class="btn-icon restore" onclick="restoreItem({{ e.id }})">↺ Restaurar</button>
+                            <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ e.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>

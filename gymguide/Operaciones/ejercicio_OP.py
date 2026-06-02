@@ -1,7 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from gymguide.models.models_sql import EjercicioModel
+from sqlalchemy.orm import selectinload
+from gymguide.models.models_sql import EjercicioModel, RutinaModel
 from gymguide.models.ejercicio import Ejercicio, EjercicioID, EjercicioUpdate
+from gymguide.models.rutina import RutinaID
 from typing import Optional
 
 
@@ -96,6 +98,20 @@ async def get_ejercicio_stats(db: AsyncSession) -> dict:
         if r.status == "active":
             by_muscle[r.grupo_muscular] = by_muscle.get(r.grupo_muscular, 0) + 1
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_muscle": by_muscle}
+
+
+async def get_ejercicio_rutinas(db: AsyncSession, ejercicio_id: int) -> list[RutinaID]:
+    result = await db.execute(
+        select(EjercicioModel).options(selectinload(EjercicioModel.rutinas)).where(EjercicioModel.id == ejercicio_id)
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return []
+    return [RutinaID(
+        id=r.id, name=r.name, level=r.level,
+        objective=r.objective, duration_weeks=r.duration_weeks,
+        image_url=r.image_url or "", status=r.status
+    ) for r in (row.rutinas or []) if r.status == "active"]
 
 
 def _row_to_id(row: EjercicioModel) -> EjercicioID:

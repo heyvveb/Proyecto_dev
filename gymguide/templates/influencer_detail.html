@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <a href="/influencers" class="cyber-btn cyber-btn-outline cyber-btn-sm mb-24" style="display:inline-flex;align-items:center;gap:6px">← Volver a Influencers</a>
+
+    <div class="card">
+        <div class="flex-between" style="align-items:flex-start">
+            <div style="display:flex;align-items:center;gap:16px">
+                {% if inf.image_url %}
+                <img src="{{ inf.image_url }}" alt="" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
+                {% endif %}
+                <div>
+                    <h2 style="margin:0 0 4px">{{ inf.name }}</h2>
+                    <span class="tag">{{ inf.categoria }}</span>
+                    <span class="badge {% if inf.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ inf.status }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+            <div class="detail-field">
+                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Red Social</span>
+                <span class="detail-value" style="color:var(--text);font-size:14px">{{ inf.red_social or '—' }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Rutina Recomendada</span>
+                <span class="detail-value" style="color:var(--text);font-size:14px">{% if inf.rutina_recomendada_nombre %}<a href="/rutinas/{{ inf.rutina_recomendada_id }}" style="color:var(--cyan)">{{ inf.rutina_recomendada_nombre }}</a>{% else %}—{% endif %}</span>
+            </div>
+            <div class="detail-field" style="grid-column:1/-1">
+                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Logros</span>
+                <span class="detail-value" style="color:var(--text);font-size:14px">{{ inf.logros or '—' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-24">
+        <h3 style="margin:0 0 16px;font-size:16px">Suplementos Asociados</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th></tr></thead>
+                <tbody>
+                    {% for s in suplementos %}
+                    <tr>
+                        <td><span class="mono-label">{{ s.id }}</span></td>
+                        <td><a href="/suplementos/{{ s.id }}" style="color:var(--cyan)">{{ s.name }}</a></td>
+                        <td><span class="tag">{{ s.type }}</span></td>
+                        <td>{{ s.brand }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4"><div class="empty-state"><p>Sin suplementos asociados</p></div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

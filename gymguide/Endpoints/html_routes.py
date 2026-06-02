@@ -3,13 +3,10 @@ from fastapi.responses import HTMLResponse
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.ext.asyncio import AsyncSession
 from gymguide.database import get_db
-from gymguide.Operaciones.influencers_op import get_influencer_stats
-from gymguide.Operaciones.rutina_OP import get_rutina_stats
-from gymguide.Operaciones.suplemento_OP import get_suplemento_stats
-from gymguide.Operaciones.ejercicio_OP import get_ejercicio_stats, showEjercicios, showEjerciciosName, showEjerciciosMuscle
-from gymguide.Operaciones.influencers_op import showInfluencers, showInfluencersName, showInfluencersCategory
-from gymguide.Operaciones.rutina_OP import showRutinas, showRutinasName, showRutinasLevel, showRutinasObjective
-from gymguide.Operaciones.suplemento_OP import showSuplementos, showSuplementosName, showSuplementosType
+from gymguide.Operaciones.influencers_op import get_influencer_stats, showInfluencers, showInfluencersName, showInfluencersCategory, showInfluencer_ID, get_influencer_suplementos
+from gymguide.Operaciones.rutina_OP import get_rutina_stats, showRutinas, showRutinasName, showRutinasLevel, showRutinasObjective, showRutina_ID, get_rutina_ejercicios, get_rutina_influencers
+from gymguide.Operaciones.suplemento_OP import get_suplemento_stats, showSuplementos, showSuplementosName, showSuplementosType, showSuplemento_ID, get_suplemento_influencers
+from gymguide.Operaciones.ejercicio_OP import get_ejercicio_stats, showEjercicios, showEjerciciosName, showEjerciciosMuscle, showEjercicio_ID, get_ejercicio_rutinas
 from sqlalchemy import select
 from gymguide.models.models_sql import InfluencerModel, RutinaModel, SuplementoModel, EjercicioModel
 import os
@@ -103,6 +100,60 @@ async def ejercicios_page(request: Request, status: str = "active", db: AsyncSes
         "request": request,
         "ejercicios": ejercicios,
         "showing_inactive": showing_inactive
+    })
+
+
+@router_html.get("/influencers/{id}", response_class=HTMLResponse)
+async def influencer_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    inf = await showInfluencer_ID(db, id)
+    if not inf:
+        return HTMLResponse("Influencer no encontrado", status_code=404)
+    suplementos = await get_influencer_suplementos(db, id)
+    return render("influencer_detail.html", {
+        "request": request,
+        "inf": inf,
+        "suplementos": suplementos
+    })
+
+
+@router_html.get("/rutinas/{id}", response_class=HTMLResponse)
+async def rutina_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    rut = await showRutina_ID(db, id)
+    if not rut:
+        return HTMLResponse("Rutina no encontrada", status_code=404)
+    ejercicios = await get_rutina_ejercicios(db, id)
+    influencers = await get_rutina_influencers(db, id)
+    return render("rutina_detail.html", {
+        "request": request,
+        "rut": rut,
+        "ejercicios": ejercicios,
+        "influencers": influencers
+    })
+
+
+@router_html.get("/suplementos/{id}", response_class=HTMLResponse)
+async def suplemento_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    sup = await showSuplemento_ID(db, id)
+    if not sup:
+        return HTMLResponse("Suplemento no encontrado", status_code=404)
+    influencers = await get_suplemento_influencers(db, id)
+    return render("suplemento_detail.html", {
+        "request": request,
+        "sup": sup,
+        "influencers": influencers
+    })
+
+
+@router_html.get("/ejercicios/{id}", response_class=HTMLResponse)
+async def ejercicio_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    ej = await showEjercicio_ID(db, id)
+    if not ej:
+        return HTMLResponse("Ejercicio no encontrado", status_code=404)
+    rutinas = await get_ejercicio_rutinas(db, id)
+    return render("ejercicio_detail.html", {
+        "request": request,
+        "ej": ej,
+        "rutinas": rutinas
     })
 
 

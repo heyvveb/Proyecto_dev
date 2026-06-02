@@ -1,8 +1,9 @@
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from gymguide.models.models_sql import InfluencerModel, RutinaModel
+from gymguide.models.models_sql import InfluencerModel, RutinaModel, SuplementoModel
 from gymguide.models.influencer import Influencer, InfluencerID, InfluencerUpdate
+from gymguide.models.suplemento import SuplementoID
 from typing import Optional
 
 
@@ -107,6 +108,20 @@ async def get_influencer_stats(db: AsyncSession) -> dict:
         if r.status == "active":
             cats[r.categoria] = cats.get(r.categoria, 0) + 1
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_category": cats}
+
+
+async def get_influencer_suplementos(db: AsyncSession, influencer_id: int) -> list[SuplementoID]:
+    result = await db.execute(
+        select(InfluencerModel).options(selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == influencer_id)
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return []
+    return [SuplementoID(
+        id=s.id, name=s.name, type=s.type, brand=s.brand,
+        benefits=s.benefits or "", price=s.price,
+        image_url=s.image_url or "", status=s.status
+    ) for s in (row.suplementos or []) if s.status == "active"]
 
 
 def _row_to_id(row: InfluencerModel) -> InfluencerID:
