@@ -119,9 +119,9 @@
             <div class="form-group"><label>Rutina Recomendada ID</label><input name="rutina_recomendada_id" type="number" placeholder="Opcional"></div>
             <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
             <div class="form-group"><label>Suplementos</label>
-                <div class="checkbox-group" style="display:flex;flex-direction:column;gap:6px;max-height:150px;overflow-y:auto;padding:6px 8px 6px 4px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                <div class="checkbox-group" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;padding:6px 8px 6px 4px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
                     {% for s in all_suplementos %}
-                    <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;
 ">
                         <input type="checkbox" class="sup-checkbox" value="{{ s.id }}"> {{ s.name }}
                     </label>
@@ -157,9 +157,9 @@
             <div class="form-group"><label>Rutina Recomendada ID</label><input id="edit_rutina_recomendada_id" name="rutina_recomendada_id" type="number"></div>
             <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
             <div class="form-group"><label>Suplementos</label>
-                <div id="editSuplementosContainer" class="checkbox-group" style="display:flex;flex-direction:column;gap:6px;max-height:150px;overflow-y:auto;padding:6px 8px 6px 4px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                <div id="editSuplementosContainer" class="checkbox-group" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;padding:6px 8px 6px 4px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
                     {% for s in all_suplementos %}
-                    <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;
 ">
                         <input type="checkbox" class="sup-checkbox" value="{{ s.id }}" data-name="{{ s.name }}"> {{ s.name }}
                     </label>
