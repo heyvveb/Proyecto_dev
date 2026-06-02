@@ -1,0 +1,2 @@
+Se  deben  evidenciar  buenas  prácticas  enfocadas  en  la  validación  de  la  información  tanto  en  los  front  como  en 
+los back. 
