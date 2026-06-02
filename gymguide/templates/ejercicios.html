@@ -37,7 +37,13 @@
                     <td><span class="mono-label">{{ e.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
-                            {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">🎯</div>{% endif %}
+                            {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                                <img 
+                                    src="https://cdn-icons-png.flaticon.com/256/2860/2860983.png"
+                                    alt="Ejercicio"
+                                    style="width:80px; height:80px; object-fit:contain;"
+                                    >
+                            </div>{% endif %}
                             <strong>{{ e.name }}</strong>
                         </div>
                     </td>

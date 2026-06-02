@@ -65,7 +65,13 @@
                             {% if inf.image_url %}
                             <img src="{{ inf.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">
                             {% else %}
-                            <div class="img-placeholder">📸</div>
+                            <div class="img-placeholder">
+                                <img 
+                                    src="https://cdn-icons-png.magnific.com/512/9292/9292340.png"
+                                    alt="Camara"
+                                    style="width:80px; height:80px; object-fit:contain;"
+                                    >
+                            </div>
                             {% endif %}
                             <strong>{{ inf.name }}</strong>
                         </div>

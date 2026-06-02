@@ -34,7 +34,13 @@
                     <td><span class="mono-label">{{ s.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
-                            {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">💊</div>{% endif %}
+                            {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                                <img 
+                                    src="https://cdn-icons-png.flaticon.com/512/4163/4163653.png"
+                                    alt="Suplementos"
+                                    style="width:80px; height:80px; object-fit:contain;"
+                                    >
+                            </div>{% endif %}
                             <strong>{{ s.name }}</strong>
                         </div>
                     </td>

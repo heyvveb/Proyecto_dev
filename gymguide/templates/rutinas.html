@@ -34,7 +34,13 @@
                     <td><span class="mono-label">{{ r.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
-                            {% if r.image_url %}<img src="{{ r.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">📋</div>{% endif %}
+                            {% if r.image_url %}<img src="{{ r.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                                <img 
+                                    src="https://cdn-icons-png.flaticon.com/256/5606/5606891.png"
+                                    alt="Calendario"
+                                    style="width:80px; height:80px; object-fit:contain;"
+                                    >
+                            </div>{% endif %}
                             <strong>{{ r.name }}</strong>
                         </div>
                     </td>
