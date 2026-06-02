@@ -51,9 +51,11 @@ async def influencers_page(request: Request, status: str = "active", db: AsyncSe
         influencers = [r for r in influencers if r.status == "inactive"]
     else:
         influencers = await showInfluencers(db, include_inactive=False)
+    all_suplementos = await showSuplementos(db)
     return render("influencers.html", {
         "request": request,
         "influencers": influencers,
+        "all_suplementos": all_suplementos,
         "showing_inactive": showing_inactive
     })
 
@@ -66,9 +68,11 @@ async def rutinas_page(request: Request, status: str = "active", db: AsyncSessio
         rutinas = [r for r in rutinas if r.status == "inactive"]
     else:
         rutinas = await showRutinas(db, include_inactive=False)
+    all_ejercicios = await showEjercicios(db)
     return render("rutinas.html", {
         "request": request,
         "rutinas": rutinas,
+        "all_ejercicios": all_ejercicios,
         "showing_inactive": showing_inactive
     })
 

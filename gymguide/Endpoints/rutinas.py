@@ -1,9 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 from gymguide.database import get_db
 from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
 from gymguide.models.enums import LevelEnum, ObjectiveEnum
 from gymguide.Operaciones.rutina_OP import *
+
+
+class EjercicioIdsRequest(BaseModel):
+    ejercicio_ids: list[int]
 
 router_rutinas = APIRouter(prefix="/rutinas", tags=["Rutinas"])
 
@@ -68,6 +73,16 @@ async def delete_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     deleted = await deleteRutina(db, rutina_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Rutina not found")
+
+
+@router_rutinas.put("/{rutina_id}/ejercicios", response_model=RutinaID)
+async def set_rutina_ejercicios_endpoint(rutina_id: int, body: EjercicioIdsRequest, db: AsyncSession = Depends(get_db)):
+    if rutina_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    result = await set_rutina_ejercicios(db, rutina_id, body.ejercicio_ids)
+    if not result:
+        raise HTTPException(status_code=404, detail="Rutina not found")
+    return result
 
 
 @router_rutinas.post("/{rutina_id}/restore", response_model=RutinaID)

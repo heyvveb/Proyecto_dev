@@ -1,9 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 from gymguide.database import get_db
 from gymguide.models.influencer import Influencer, InfluencerID, InfluencerUpdate
 from gymguide.models.enums import CategoriaEnum
 from gymguide.Operaciones.influencers_op import *
+
+
+class SuplementoIdsRequest(BaseModel):
+    suplemento_ids: list[int]
 
 router_influencers = APIRouter(prefix="/influencers", tags=["Influencers"])
 
@@ -66,6 +71,16 @@ async def delete_influencer(influencer_id: int, db: AsyncSession = Depends(get_d
     deleted = await deleteInfluencer(db, influencer_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Influencer not found")
+
+
+@router_influencers.put("/{influencer_id}/suplementos", response_model=InfluencerID)
+async def set_influencer_suplementos_endpoint(influencer_id: int, body: SuplementoIdsRequest, db: AsyncSession = Depends(get_db)):
+    if influencer_id <= 0:
+        raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    result = await set_influencer_suplementos(db, influencer_id, body.suplemento_ids)
+    if not result:
+        raise HTTPException(status_code=404, detail="Influencer not found")
+    return result
 
 
 @router_influencers.post("/{influencer_id}/restore", response_model=InfluencerID)
