@@ -44,7 +44,7 @@
                     <td>{% for eid in r.ejercicio_ids %}{{ ejercicio_map.get(eid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ r.id }})">✎ Editar</button>
+                            {% if r.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ r.id }})">✎ Editar</button>{% endif %}
                             {% if r.status == 'active' %}
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ r.id }})">✕ Eliminar</button>
                             {% else %}

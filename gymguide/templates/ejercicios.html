@@ -47,7 +47,7 @@
                     <td><span class="mono-label">{{ e.descanso_segundos }}s</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ e.id }})">✎ Editar</button>
+                            {% if e.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ e.id }})">✎ Editar</button>{% endif %}
                             {% if e.status == 'active' %}
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ e.id }})">✕ Eliminar</button>
                             {% else %}

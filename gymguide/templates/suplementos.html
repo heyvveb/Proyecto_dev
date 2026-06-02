@@ -43,7 +43,7 @@
                     <td><span class="mono-label">{% if s.price %}${{ s.price }}{% else %}—{% endif %}</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ s.id }})">✎ Editar</button>
+                            {% if s.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ s.id }})">✎ Editar</button>{% endif %}
                             {% if s.status == 'active' %}
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ s.id }})">✕ Eliminar</button>
                             {% else %}

@@ -61,7 +61,7 @@
                     <td>{% for sid in inf.suplemento_ids %}{{ suplemento_map.get(sid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
-                            <button class="btn-icon edit" onclick="event.stopPropagation();editInfluencer({{ inf.id }})">✎ Editar</button>
+                            {% if inf.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editInfluencer({{ inf.id }})">✎ Editar</button>{% endif %}
                             {% if inf.status == 'active' %}
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteInfluencer({{ inf.id }})">✕ Eliminar</button>
                             {% else %}
