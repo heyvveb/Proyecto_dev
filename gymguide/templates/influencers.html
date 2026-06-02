@@ -23,8 +23,10 @@
             <option value="crossfit">Crossfit</option>
             <option value="yoga">Yoga</option>
         </select>
-
     </div>
+
+    {% set suplemento_map = {} %}
+    {% for s in all_suplementos %}{% set _ = suplemento_map.__setitem__(s.id, s.name) %}{% endfor %}
 
     <div class="table-wrap">
         <table>
@@ -35,6 +37,7 @@
                     <th>Categoría</th>
                     <th>Red Social</th>
                     <th>Rutina Recomendada</th>
+                    <th>Suplementos</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -55,6 +58,7 @@
                     <td><span class="tag">{{ inf.categoria }}</span></td>
                     <td>{{ inf.red_social }}</td>
                     <td><span class="mono-label">{{ inf.rutina_recomendada_nombre or '—' }}</span></td>
+                    <td>{% for sid in inf.suplemento_ids %}{{ suplemento_map.get(sid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
                             <button class="btn-icon edit" onclick="event.stopPropagation();editInfluencer({{ inf.id }})">✎ Editar</button>
@@ -67,7 +71,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="6"><div class="empty-state"><h3>Sin influencers</h3><p>No hay influencers registrados aún.</p></div></td></tr>
+                <tr><td colspan="7"><div class="empty-state"><h3>Sin influencers</h3><p>No hay influencers registrados aún.</p></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -93,6 +97,15 @@
             <div class="form-group"><label>Red Social</label><input name="red_social" placeholder="@usuario"></div>
             <div class="form-group"><label>Rutina Recomendada ID</label><input name="rutina_recomendada_id" type="number" placeholder="Opcional"></div>
             <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+            <div class="form-group"><label>Suplementos</label>
+                <div class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                    {% for s in all_suplementos %}
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+                        <input type="checkbox" class="sup-checkbox" value="{{ s.id }}"> {{ s.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="form-actions">
                 <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button>
                 <button type="submit" class="cyber-btn cyber-btn-sm">Crear</button>
@@ -121,6 +134,15 @@
             <div class="form-group"><label>Red Social</label><input id="edit_red_social" name="red_social"></div>
             <div class="form-group"><label>Rutina Recomendada ID</label><input id="edit_rutina_recomendada_id" name="rutina_recomendada_id" type="number"></div>
             <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
+            <div class="form-group"><label>Suplementos</label>
+                <div id="editSuplementosContainer" class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                    {% for s in all_suplementos %}
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+                        <input type="checkbox" class="sup-checkbox" value="{{ s.id }}" data-name="{{ s.name }}"> {{ s.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="form-actions">
                 <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button>
                 <button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button>
@@ -132,6 +154,10 @@
 
 {% block scripts %}
 <script>
+    function getCheckedSuplementoIds() {
+        return Array.from(document.querySelectorAll('.sup-checkbox:checked')).map(cb => parseInt(cb.value));
+    }
+
     async function createInfluencer(e) {
         e.preventDefault();
         const fd = new FormData(e.target);
@@ -139,8 +165,12 @@
         if (data.rutina_recomendada_id === '') data.rutina_recomendada_id = null;
         else data.rutina_recomendada_id = parseInt(data.rutina_recomendada_id);
         if (data.image_url === '') data.image_url = null;
+        const suplemento_ids = getCheckedSuplementoIds();
         try {
-            await api('POST', '/influencers', data);
+            const result = await api('POST', '/influencers', data);
+            if (suplemento_ids.length) {
+                await api('PUT', '/influencers/' + result.id + '/suplementos', { suplemento_ids });
+            }
             showToast('Influencer creado exitosamente');
             closeModal('createModal');
             setTimeout(() => location.reload(), 500);
@@ -157,6 +187,9 @@
             document.getElementById('edit_red_social').value = data.red_social || '';
             document.getElementById('edit_rutina_recomendada_id').value = data.rutina_recomendada_id || '';
             document.getElementById('edit_image_url').value = data.image_url || '';
+            document.querySelectorAll('#editSuplementosContainer .sup-checkbox').forEach(cb => {
+                cb.checked = (data.suplemento_ids || []).includes(parseInt(cb.value));
+            });
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
@@ -170,8 +203,10 @@
         if (data.rutina_recomendada_id === '') data.rutina_recomendada_id = null;
         else data.rutina_recomendada_id = parseInt(data.rutina_recomendada_id);
         if (data.image_url === '') data.image_url = null;
+        const suplemento_ids = getCheckedSuplementoIds();
         try {
             await api('PATCH', '/influencers/' + id, data);
+            await api('PUT', '/influencers/' + id + '/suplementos', { suplemento_ids });
             showToast('Influencer actualizado');
             closeModal('editModal');
             setTimeout(() => location.reload(), 500);

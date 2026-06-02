@@ -20,11 +20,14 @@
             <option value="intermedio">Intermedio</option>
             <option value="avanzado">Avanzado</option>
         </select>
-
     </div>
+
+    {% set ejercicio_map = {} %}
+    {% for e in all_ejercicios %}{% set _ = ejercicio_map.__setitem__(e.id, e.name) %}{% endfor %}
+
     <div class="table-wrap">
         <table>
-            <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Ejercicios</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for r in rutinas %}
                 <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}" onclick="window.location='/rutinas/{{ r.id }}'" style="cursor:pointer">
@@ -38,6 +41,7 @@
                     <td><span class="tag">{{ r.level }}</span></td>
                     <td>{{ r.objective }}</td>
                     <td><span class="mono-label">{{ r.duration_weeks }} sem</span></td>
+                    <td>{% for eid in r.ejercicio_ids %}{{ ejercicio_map.get(eid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
                             <button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ r.id }})">✎ Editar</button>
@@ -50,7 +54,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="6"><div class="empty-state"><h3>Sin rutinas</h3><p>No hay rutinas registradas aún.</p></div></td></tr>
+                <tr><td colspan="7"><div class="empty-state"><h3>Sin rutinas</h3><p>No hay rutinas registradas aún.</p></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -66,6 +70,15 @@
         <div class="form-group"><label>Objetivo</label><select name="objective" required><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
         <div class="form-group"><label>Duración (semanas)</label><input name="duration_weeks" type="number" min="1" max="52" required></div>
         <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+        <div class="form-group"><label>Ejercicios</label>
+            <div class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                {% for e in all_ejercicios %}
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+                    <input type="checkbox" class="ej-checkbox" value="{{ e.id }}"> {{ e.name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
     </form>
 </div></div>
@@ -80,7 +93,15 @@
         <div class="form-group"><label>Objetivo</label><select id="edit_objective" name="objective"><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
         <div class="form-group"><label>Duración (semanas)</label><input id="edit_duration_weeks" name="duration_weeks" type="number" min="1" max="52"></div>
         <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
-
+        <div class="form-group"><label>Ejercicios</label>
+            <div id="editEjerciciosContainer" class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:4px">
+                {% for e in all_ejercicios %}
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+                    <input type="checkbox" class="ej-checkbox" value="{{ e.id }}"> {{ e.name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
     </form>
 </div></div>
@@ -89,29 +110,66 @@
 {% block scripts %}
 <script>
     const ENTITY = 'rutinas';
-    async function createItem(e) {
-        e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
-        data.duration_weeks = parseInt(data.duration_weeks); if (!data.image_url) data.image_url = null;
-        try { await api('POST', '/' + ENTITY, data); showToast('Rutina creada'); closeModal('createModal'); setTimeout(() => location.reload(), 500); }
-        catch (err) { showToast(err.message, 'error'); }
+
+    function getCheckedEjercicioIds() {
+        return Array.from(document.querySelectorAll('.ej-checkbox:checked')).map(cb => parseInt(cb.value));
     }
+
+    async function createItem(e) {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const data = Object.fromEntries(fd);
+        data.duration_weeks = parseInt(data.duration_weeks);
+        if (!data.image_url) data.image_url = null;
+        const ejercicio_ids = getCheckedEjercicioIds();
+        try {
+            const result = await api('POST', '/' + ENTITY, data);
+            if (ejercicio_ids.length) {
+                await api('PUT', '/' + ENTITY + '/' + result.id + '/ejercicios', { ejercicio_ids });
+            }
+            showToast('Rutina creada');
+            closeModal('createModal');
+            setTimeout(() => location.reload(), 500);
+        } catch (err) { showToast(err.message, 'error'); }
+    }
+
     async function editItem(id) {
-        try { const d = await api('GET', '/' + ENTITY + '/' + id);
-            document.getElementById('edit_id').value = d.id; document.getElementById('edit_name').value = d.name;
-            document.getElementById('edit_level').value = d.level; document.getElementById('edit_objective').value = d.objective;
-            document.getElementById('edit_duration_weeks').value = d.duration_weeks; document.getElementById('edit_image_url').value = d.image_url || '';
+        try {
+            const d = await api('GET', '/' + ENTITY + '/' + id);
+            document.getElementById('edit_id').value = d.id;
+            document.getElementById('edit_name').value = d.name;
+            document.getElementById('edit_level').value = d.level;
+            document.getElementById('edit_objective').value = d.objective;
+            document.getElementById('edit_duration_weeks').value = d.duration_weeks;
+            document.getElementById('edit_image_url').value = d.image_url || '';
+            document.querySelectorAll('#editEjerciciosContainer .ej-checkbox').forEach(cb => {
+                cb.checked = (d.ejercicio_ids || []).includes(parseInt(cb.value));
+            });
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
+
     async function updateItem(e) {
-        e.preventDefault(); const id = document.getElementById('edit_id').value;
-        const fd = new FormData(e.target); const data = Object.fromEntries(fd); delete data.id;
-        data.duration_weeks = parseInt(data.duration_weeks); if (!data.image_url) data.image_url = null;
-        try { await api('PATCH', '/' + ENTITY + '/' + id, data); showToast('Rutina actualizada'); closeModal('editModal'); setTimeout(() => location.reload(), 500); }
-        catch (err) { showToast(err.message, 'error'); }
+        e.preventDefault();
+        const id = document.getElementById('edit_id').value;
+        const fd = new FormData(e.target);
+        const data = Object.fromEntries(fd);
+        delete data.id;
+        data.duration_weeks = parseInt(data.duration_weeks);
+        if (!data.image_url) data.image_url = null;
+        const ejercicio_ids = getCheckedEjercicioIds();
+        try {
+            await api('PATCH', '/' + ENTITY + '/' + id, data);
+            await api('PUT', '/' + ENTITY + '/' + id + '/ejercicios', { ejercicio_ids });
+            showToast('Rutina actualizada');
+            closeModal('editModal');
+            setTimeout(() => location.reload(), 500);
+        } catch (err) { showToast(err.message, 'error'); }
     }
+
     async function deleteItem(id) { if (!confirm('¿Eliminar esta rutina?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Rutina desactivada'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
     async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Rutina restaurada'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterLevel')?.addEventListener('change', filterTable);
     function filterTable() {
