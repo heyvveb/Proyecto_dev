@@ -102,7 +102,7 @@ async def get_suplemento_stats(db: AsyncSession) -> dict:
 
 async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> list[InfluencerID]:
     result = await db.execute(
-        select(SuplementoModel).options(selectinload(SuplementoModel.influencers)).where(SuplementoModel.id == suplemento_id)
+        select(SuplementoModel).options(selectinload(SuplementoModel.influencers).selectinload(InfluencerModel.rutina_recomendada)).where(SuplementoModel.id == suplemento_id)
     )
     row = result.scalar_one_or_none()
     if not row:
