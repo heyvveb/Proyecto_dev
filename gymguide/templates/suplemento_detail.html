@@ -18,15 +18,15 @@
 
             <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
             <div class="detail-field">
-                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Marca</span>
+                <span class="detail-label" style="color:var(--gray-400);font-family:'JetBrains Mono',monospace">Marca</span>
                 <span class="detail-value" style="color:var(--text);font-size:14px">{{ sup.brand }}</span>
             </div>
             <div class="detail-field">
-                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Precio</span>
+                <span class="detail-label" style="color:var(--gray-400);font-family:'JetBrains Mono',monospace">Precio</span>
                 <span class="detail-value" style="color:var(--text);font-size:14px">{% if sup.price %}${{ sup.price }}{% else %}—{% endif %}</span>
             </div>
             <div class="detail-field" style="grid-column:1/-1">
-                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Beneficios</span>
+                <span class="detail-label" style="color:var(--gray-400);font-family:'JetBrains Mono',monospace">Beneficios</span>
                 <span class="detail-value" style="color:var(--text);font-size:14px">{{ sup.benefits or '—' }}</span>
             </div>
         </div>
