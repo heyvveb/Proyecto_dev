@@ -23,10 +23,29 @@
             <option value="crossfit">Crossfit</option>
             <option value="yoga">Yoga</option>
         </select>
+        <select id="filterRutina" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todas las rutinas</option>
+            {% for rname in rutinas_set|sort %}
+            <option value="{{ rname|lower }}">{{ rname }}</option>
+            {% endfor %}
+        </select>
+        <select id="filterSuplemento" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos los suplementos</option>
+            {% for s in all_suplementos %}
+            <option value="{{ s.name|lower }}">{{ s.name }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     {% set suplemento_map = {} %}
     {% for s in all_suplementos %}{% set _ = suplemento_map.__setitem__(s.id, s.name) %}{% endfor %}
+
+    {% set rutinas_set = [] %}
+    {% for inf in influencers %}
+      {% if inf.rutina_recomendada_nombre and inf.rutina_recomendada_nombre not in rutinas_set %}
+        {% set _ = rutinas_set.append(inf.rutina_recomendada_nombre) %}
+      {% endif %}
+    {% endfor %}
 
     <div class="table-wrap">
         <table>
@@ -43,7 +62,10 @@
             </thead>
             <tbody id="influencersTable">
                 {% for inf in influencers %}
-                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}" onclick="window.location='/influencers/{{ inf.id }}'" style="cursor:pointer">
+                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}"
+                    data-rutina="{{ (inf.rutina_recomendada_nombre or '')|lower }}"
+                    data-suplementos="{% for sid in inf.suplemento_ids %}{{ suplemento_map.get(sid, '')|lower }}{% if not loop.last %},{% endif %}{% endfor %}"
+                    onclick="window.location='/influencers/{{ inf.id }}'" style="cursor:pointer">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -232,14 +254,24 @@
 
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterCategory')?.addEventListener('change', filterTable);
+    document.getElementById('filterRutina')?.addEventListener('change', filterTable);
+    document.getElementById('filterSuplemento')?.addEventListener('change', filterTable);
 
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const cat = document.getElementById('filterCategory').value.toLowerCase();
+        const rut = document.getElementById('filterRutina').value.toLowerCase();
+        const sup = document.getElementById('filterSuplemento').value.toLowerCase();
         document.querySelectorAll('#influencersTable tr').forEach(tr => {
             const name = (tr.dataset.name || '').toLowerCase();
             const category = (tr.dataset.category || '').toLowerCase();
-            tr.style.display = (!q || name.includes(q)) && (!cat || category === cat) ? '' : 'none';
+            const rutina = (tr.dataset.rutina || '').toLowerCase();
+            const suplementos = (tr.dataset.suplementos || '').toLowerCase();
+            tr.style.display = (!q || name.includes(q))
+                && (!cat || category === cat)
+                && (!rut || rutina === rut)
+                && (!sup || suplementos.split(',').some(s => s.trim() === sup))
+                ? '' : 'none';
         });
     }
 </script>
