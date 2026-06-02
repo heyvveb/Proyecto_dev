@@ -9,7 +9,6 @@ class Influencer(BaseModel):
     logros: str = ""
     red_social: str = ""
     rutina_recomendada_id: Optional[int] = None
-    rutina_recomendada_nombre: Optional[str] = None
     image_url: Optional[str] = Field(None, max_length=500)
     status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
 
@@ -28,6 +27,7 @@ class Influencer(BaseModel):
 
 class InfluencerID(Influencer):
     id: int = Field(..., gt=0)
+    rutina_recomendada_nombre: Optional[str] = None
 
 class InfluencerUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
