@@ -25,6 +25,7 @@ class Rutina(BaseModel):
 
 class RutinaID(Rutina):
     id: int = Field(..., gt=0)
+    ejercicio_ids: list[int] = []
 
 class RutinaUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -33,3 +34,4 @@ class RutinaUpdate(BaseModel):
     duration_weeks: Optional[int] = Field(None, ge=1, le=52)
     image_url: Optional[str] = Field(None, max_length=500)
     status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    ejercicio_ids: Optional[list[int]] = None
