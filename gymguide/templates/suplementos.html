@@ -93,9 +93,9 @@
     <button class="modal-close" onclick="closeModal('createModal')">✕</button>
     <h2>Nuevo <span class="glow-text">Suplemento</span></h2>
     <form id="createForm" onsubmit="return createItem(event)">
-        <div class="form-group"><label>Nombre</label><input name="name" required></div>
+        <div class="form-group"><label>Nombre</label><input name="name" required minlength="1" maxlength="100"></div>
         <div class="form-group"><label>Tipo</label><select name="type" required><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
-        <div class="form-group"><label>Marca</label><input name="brand" required></div>
+        <div class="form-group"><label>Marca</label><input name="brand" required maxlength="100"></div>
         <div class="form-group"><label>Beneficios</label><textarea name="benefits" rows="2"></textarea></div>
         <div class="form-group"><label>Precio ($)</label><input name="price" type="number" min="0" step="0.01"></div>
         <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
@@ -108,9 +108,9 @@
     <h2>Editar <span class="glow-text">Suplemento</span></h2>
     <form id="editForm" onsubmit="return updateItem(event)">
         <input type="hidden" id="edit_id">
-        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required></div>
-        <div class="form-group"><label>Tipo</label><select id="edit_type" name="type"><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
-        <div class="form-group"><label>Marca</label><input id="edit_brand" name="brand" required></div>
+        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1" maxlength="100"></div>
+        <div class="form-group"><label>Tipo</label><select id="edit_type" name="type" required><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
+        <div class="form-group"><label>Marca</label><input id="edit_brand" name="brand" required maxlength="100"></div>
         <div class="form-group"><label>Beneficios</label><textarea id="edit_benefits" name="benefits" rows="2"></textarea></div>
         <div class="form-group"><label>Precio ($)</label><input id="edit_price" name="price" type="number" min="0" step="0.01"></div>
         <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>

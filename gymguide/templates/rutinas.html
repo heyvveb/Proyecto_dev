@@ -118,9 +118,9 @@
     <h2>Editar <span class="glow-text">Rutina</span></h2>
     <form id="editForm" onsubmit="return updateItem(event)">
         <input type="hidden" id="edit_id">
-        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required></div>
-        <div class="form-group"><label>Nivel</label><select id="edit_level" name="level"><option value="Principiante">Principiante</option><option value="Intermedio">Intermedio</option><option value="Avanzado">Avanzado</option></select></div>
-        <div class="form-group"><label>Objetivo</label><select id="edit_objective" name="objective"><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
+        <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1"></div>
+        <div class="form-group"><label>Nivel</label><select id="edit_level" name="level" required><option value="Principiante">Principiante</option><option value="Intermedio">Intermedio</option><option value="Avanzado">Avanzado</option></select></div>
+        <div class="form-group"><label>Objetivo</label><select id="edit_objective" name="objective" required><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
         <div class="form-group"><label>Duración (semanas)</label><input id="edit_duration_weeks" name="duration_weeks" type="number" min="1" max="52"></div>
         <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
         <div class="form-group"><label>Ejercicios</label>
