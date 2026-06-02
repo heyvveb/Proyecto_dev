@@ -52,10 +52,15 @@ async def influencers_page(request: Request, status: str = "active", db: AsyncSe
     else:
         influencers = await showInfluencers(db, include_inactive=False)
     all_suplementos = await showSuplementos(db)
+    rutinas_nombres = sorted(set(
+        inf.rutina_recomendada_nombre for inf in influencers
+        if inf.rutina_recomendada_nombre
+    ))
     return render("influencers.html", {
         "request": request,
         "influencers": influencers,
         "all_suplementos": all_suplementos,
+        "rutinas_nombres": rutinas_nombres,
         "showing_inactive": showing_inactive
     })
 

@@ -25,7 +25,7 @@
         </select>
         <select id="filterRutina" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todas las rutinas</option>
-            {% for rname in rutinas_set|sort %}
+            {% for rname in rutinas_nombres %}
             <option value="{{ rname|lower }}">{{ rname }}</option>
             {% endfor %}
         </select>
@@ -39,13 +39,6 @@
 
     {% set suplemento_map = {} %}
     {% for s in all_suplementos %}{% set _ = suplemento_map.__setitem__(s.id, s.name) %}{% endfor %}
-
-    {% set rutinas_set = [] %}
-    {% for inf in influencers %}
-      {% if inf.rutina_recomendada_nombre and inf.rutina_recomendada_nombre not in rutinas_set %}
-        {% set _ = rutinas_set.append(inf.rutina_recomendada_nombre) %}
-      {% endif %}
-    {% endfor %}
 
     <div class="table-wrap">
         <table>
