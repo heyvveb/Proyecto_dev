@@ -20,7 +20,7 @@ async def createInfluencer(db: AsyncSession, influencer: Influencer) -> Influenc
 
 
 async def showInfluencers(db: AsyncSession, include_inactive: bool = False) -> list[InfluencerID]:
-    query = select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada))
+    query = select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos))
     if not include_inactive:
         query = query.where(InfluencerModel.status == "active")
     result = await db.execute(query.order_by(InfluencerModel.id))
@@ -29,7 +29,7 @@ async def showInfluencers(db: AsyncSession, include_inactive: bool = False) -> l
 
 
 async def showInfluencer_ID(db: AsyncSession, id: int, include_inactive: bool = False) -> Optional[InfluencerID]:
-    query = select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(InfluencerModel.id == id)
+    query = select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id)
     if not include_inactive:
         query = query.where(InfluencerModel.status == "active")
     result = await db.execute(query)
@@ -66,7 +66,7 @@ async def deleteInfluencer(db: AsyncSession, id: int) -> Optional[Influencer]:
 
 async def showInfluencersCategory(db: AsyncSession, categoria: str) -> list[InfluencerID]:
     result = await db.execute(
-        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(InfluencerModel.categoria.ilike(categoria), InfluencerModel.status == "active")
+        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.categoria.ilike(categoria), InfluencerModel.status == "active")
         .order_by(InfluencerModel.id)
     )
     return [_row_to_id(r) for r in result.scalars().all()]
@@ -74,7 +74,7 @@ async def showInfluencersCategory(db: AsyncSession, categoria: str) -> list[Infl
 
 async def showInfluencersName(db: AsyncSession, name: str) -> list[InfluencerID]:
     result = await db.execute(
-        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(InfluencerModel.name.ilike(f"%{name}%"), InfluencerModel.status == "active")
+        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.name.ilike(f"%{name}%"), InfluencerModel.status == "active")
         .order_by(InfluencerModel.id)
     )
     return [_row_to_id(r) for r in result.scalars().all()]
@@ -82,13 +82,13 @@ async def showInfluencersName(db: AsyncSession, name: str) -> list[InfluencerID]
 
 async def showInactiveInfluencers(db: AsyncSession) -> list[InfluencerID]:
     result = await db.execute(
-        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(InfluencerModel.status == "inactive").order_by(InfluencerModel.id)
+        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.status == "inactive").order_by(InfluencerModel.id)
     )
     return [_row_to_id(r) for r in result.scalars().all()]
 
 
 async def restoreInfluencer(db: AsyncSession, id: int) -> Optional[InfluencerID]:
-    result = await db.execute(select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada)).where(InfluencerModel.id == id, InfluencerModel.status == "inactive"))
+    result = await db.execute(select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id, InfluencerModel.status == "inactive"))
     row = result.scalar_one_or_none()
     if not row:
         return None
@@ -124,8 +124,26 @@ async def get_influencer_suplementos(db: AsyncSession, influencer_id: int) -> li
     ) for s in (row.suplementos or []) if s.status == "active"]
 
 
+async def set_influencer_suplementos(db: AsyncSession, id: int, suplemento_ids: list[int]) -> Optional[InfluencerID]:
+    result = await db.execute(
+        select(InfluencerModel).options(selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id)
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return None
+    if suplemento_ids:
+        sups = await db.execute(select(SuplementoModel).where(SuplementoModel.id.in_(suplemento_ids)))
+        row.suplementos = list(sups.scalars().all())
+    else:
+        row.suplementos = []
+    await db.commit()
+    await db.refresh(row)
+    return _row_to_id(row)
+
+
 def _row_to_id(row: InfluencerModel) -> InfluencerID:
     rutina_nombre = row.rutina_recomendada.name if row.rutina_recomendada else None
+    suplemento_ids = [s.id for s in (row.suplementos or []) if s.status == "active"]
     return InfluencerID(
         id=row.id,
         name=row.name,
@@ -134,6 +152,7 @@ def _row_to_id(row: InfluencerModel) -> InfluencerID:
         red_social=row.red_social or "",
         rutina_recomendada_id=row.rutina_recomendada_id,
         rutina_recomendada_nombre=rutina_nombre,
+        suplemento_ids=suplemento_ids,
         image_url=row.image_url or "",
         status=row.status
     )
