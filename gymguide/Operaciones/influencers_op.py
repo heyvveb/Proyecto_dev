@@ -126,7 +126,7 @@ async def get_influencer_suplementos(db: AsyncSession, influencer_id: int) -> li
 
 async def set_influencer_suplementos(db: AsyncSession, id: int, suplemento_ids: list[int]) -> Optional[InfluencerID]:
     result = await db.execute(
-        select(InfluencerModel).options(selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id)
+        select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id)
     )
     row = result.scalar_one_or_none()
     if not row:
