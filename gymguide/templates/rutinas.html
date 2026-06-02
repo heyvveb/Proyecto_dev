@@ -3,7 +3,14 @@
 <div class="container">
     <div class="flex-between mb-24">
         <div class="section-title" style="margin:0"><h2>Rutinas</h2><span class="line"></span></div>
-        <button class="cyber-btn" onclick="openModal('createModal')">+ Nueva</button>
+        <div style="display:flex;gap:8px">
+            <button class="cyber-btn" onclick="openModal('createModal')">+ Nueva</button>
+            {% if showing_inactive %}
+            <a href="/rutinas" class="cyber-btn cyber-btn-outline">← Ver activos</a>
+            {% else %}
+            <a href="/rutinas?status=inactive" class="cyber-btn cyber-btn-outline">🗑 Ver eliminados</a>
+            {% endif %}
+        </div>
     </div>
     <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
         <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">

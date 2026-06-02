@@ -47,38 +47,62 @@ async def index(request: Request, db: AsyncSession = Depends(get_db)):
 
 
 @router_html.get("/influencers", response_class=HTMLResponse)
-async def influencers_page(request: Request, db: AsyncSession = Depends(get_db)):
-    influencers = await showInfluencers(db, include_inactive=False)
+async def influencers_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        influencers = await showInfluencers(db, include_inactive=True)
+        influencers = [r for r in influencers if r.status == "inactive"]
+    else:
+        influencers = await showInfluencers(db, include_inactive=False)
     return render("influencers.html", {
         "request": request,
-        "influencers": influencers
+        "influencers": influencers,
+        "showing_inactive": showing_inactive
     })
 
 
 @router_html.get("/rutinas", response_class=HTMLResponse)
-async def rutinas_page(request: Request, db: AsyncSession = Depends(get_db)):
-    rutinas = await showRutinas(db, include_inactive=False)
+async def rutinas_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        rutinas = await showRutinas(db, include_inactive=True)
+        rutinas = [r for r in rutinas if r.status == "inactive"]
+    else:
+        rutinas = await showRutinas(db, include_inactive=False)
     return render("rutinas.html", {
         "request": request,
-        "rutinas": rutinas
+        "rutinas": rutinas,
+        "showing_inactive": showing_inactive
     })
 
 
 @router_html.get("/suplementos", response_class=HTMLResponse)
-async def suplementos_page(request: Request, db: AsyncSession = Depends(get_db)):
-    suplementos = await showSuplementos(db, include_inactive=False)
+async def suplementos_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        suplementos = await showSuplementos(db, include_inactive=True)
+        suplementos = [r for r in suplementos if r.status == "inactive"]
+    else:
+        suplementos = await showSuplementos(db, include_inactive=False)
     return render("suplementos.html", {
         "request": request,
-        "suplementos": suplementos
+        "suplementos": suplementos,
+        "showing_inactive": showing_inactive
     })
 
 
 @router_html.get("/ejercicios", response_class=HTMLResponse)
-async def ejercicios_page(request: Request, db: AsyncSession = Depends(get_db)):
-    ejercicios = await showEjercicios(db, include_inactive=False)
+async def ejercicios_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        ejercicios = await showEjercicios(db, include_inactive=True)
+        ejercicios = [r for r in ejercicios if r.status == "inactive"]
+    else:
+        ejercicios = await showEjercicios(db, include_inactive=False)
     return render("ejercicios.html", {
         "request": request,
-        "ejercicios": ejercicios
+        "ejercicios": ejercicios,
+        "showing_inactive": showing_inactive
     })
 
 
