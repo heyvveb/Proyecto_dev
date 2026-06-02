@@ -6,17 +6,23 @@ class CategoriaEnum(str, Enum):
     powerlifting = "powerlifting"
     crossfit = "crossfit"
     yoga = "yoga"
+    def __str__(self):
+        return self.value
 
 class LevelEnum(str, Enum):
     Principiante = "Principiante"
     Intermedio = "Intermedio"
     Avanzado = "Avanzado"
+    def __str__(self):
+        return self.value
 
 class ObjectiveEnum(str, Enum):
     Ganancia_Muscular = "Ganancia Muscular"
     Perdida_de_grasa = "Perdida de grasa"
     Fuerza = "Fuerza"
     Resistencia = "Resistencia"
+    def __str__(self):
+        return self.value
 
 class TipoSuplementoEnum(str, Enum):
     Proteina = "Proteina"
@@ -25,6 +31,8 @@ class TipoSuplementoEnum(str, Enum):
     Amino_acidos = "Amino acidos"
     Vitaminas = "Vitaminas"
     Fat_burner = "Fat burner"
+    def __str__(self):
+        return self.value
 
 class GrupoMuscularEnum(str, Enum):
     Pecho = "Pecho"
@@ -36,3 +44,5 @@ class GrupoMuscularEnum(str, Enum):
     Gluteos = "Gluteos"
     Abdominales = "Abdominales"
     Cardiovascular = "Cardiovascular"
+    def __str__(self):
+        return self.value

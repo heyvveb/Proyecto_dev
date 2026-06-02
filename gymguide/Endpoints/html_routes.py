@@ -48,7 +48,7 @@ async def index(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router_html.get("/influencers", response_class=HTMLResponse)
 async def influencers_page(request: Request, db: AsyncSession = Depends(get_db)):
-    influencers = await showInfluencers(db, include_inactive=True)
+    influencers = await showInfluencers(db, include_inactive=False)
     return render("influencers.html", {
         "request": request,
         "influencers": influencers
@@ -57,7 +57,7 @@ async def influencers_page(request: Request, db: AsyncSession = Depends(get_db))
 
 @router_html.get("/rutinas", response_class=HTMLResponse)
 async def rutinas_page(request: Request, db: AsyncSession = Depends(get_db)):
-    rutinas = await showRutinas(db, include_inactive=True)
+    rutinas = await showRutinas(db, include_inactive=False)
     return render("rutinas.html", {
         "request": request,
         "rutinas": rutinas
@@ -66,7 +66,7 @@ async def rutinas_page(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router_html.get("/suplementos", response_class=HTMLResponse)
 async def suplementos_page(request: Request, db: AsyncSession = Depends(get_db)):
-    suplementos = await showSuplementos(db, include_inactive=True)
+    suplementos = await showSuplementos(db, include_inactive=False)
     return render("suplementos.html", {
         "request": request,
         "suplementos": suplementos
@@ -75,7 +75,7 @@ async def suplementos_page(request: Request, db: AsyncSession = Depends(get_db))
 
 @router_html.get("/ejercicios", response_class=HTMLResponse)
 async def ejercicios_page(request: Request, db: AsyncSession = Depends(get_db)):
-    ejercicios = await showEjercicios(db, include_inactive=True)
+    ejercicios = await showEjercicios(db, include_inactive=False)
     return render("ejercicios.html", {
         "request": request,
         "ejercicios": ejercicios

@@ -16,11 +16,7 @@
             <option value="crossfit">Crossfit</option>
             <option value="yoga">Yoga</option>
         </select>
-        <select id="filterStatus" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-            <option value="">Todos</option>
-        </select>
+
     </div>
 
     <div class="table-wrap">
@@ -31,14 +27,13 @@
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Red Social</th>
-                    <th>Rutina ID</th>
-                    <th>Status</th>
+                    <th>Rutina Recomendada</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="influencersTable">
                 {% for inf in influencers %}
-                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}" data-status="{{ inf.status }}">
+                <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -52,8 +47,7 @@
                     </td>
                     <td><span class="tag">{{ inf.categoria }}</span></td>
                     <td>{{ inf.red_social }}</td>
-                    <td><span class="mono-label">{{ inf.rutina_recomendada_id or '—' }}</span></td>
-                    <td><span class="badge {% if inf.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ inf.status }}</span></td>
+                    <td><span class="mono-label">{{ inf.rutina_recomendada_nombre or '—' }}</span></td>
                     <td>
                         <div class="action-group">
                             <button class="btn-icon edit" onclick="editInfluencer({{ inf.id }})">✎ Editar</button>
@@ -66,7 +60,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="7"><div class="empty-state"><h3>Sin influencers</h3><p>No hay influencers registrados aún.</p></div></td></tr>
+                <tr><td colspan="6"><div class="empty-state"><h3>Sin influencers</h3><p>No hay influencers registrados aún.</p></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -120,12 +114,6 @@
             <div class="form-group"><label>Red Social</label><input id="edit_red_social" name="red_social"></div>
             <div class="form-group"><label>Rutina Recomendada ID</label><input id="edit_rutina_recomendada_id" name="rutina_recomendada_id" type="number"></div>
             <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
-            <div class="form-group"><label>Status</label>
-                <select id="edit_status" name="status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
             <div class="form-actions">
                 <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button>
                 <button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button>
@@ -162,7 +150,6 @@
             document.getElementById('edit_red_social').value = data.red_social || '';
             document.getElementById('edit_rutina_recomendada_id').value = data.rutina_recomendada_id || '';
             document.getElementById('edit_image_url').value = data.image_url || '';
-            document.getElementById('edit_status').value = data.status;
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
@@ -203,18 +190,14 @@
 
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterCategory')?.addEventListener('change', filterTable);
-    document.getElementById('filterStatus')?.addEventListener('change', filterTable);
 
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const cat = document.getElementById('filterCategory').value.toLowerCase();
-        const st = document.getElementById('filterStatus').value;
         document.querySelectorAll('#influencersTable tr').forEach(tr => {
             const name = (tr.dataset.name || '').toLowerCase();
             const category = (tr.dataset.category || '').toLowerCase();
-            const status = tr.dataset.status || '';
-            const match = (!q || name.includes(q)) && (!cat || category === cat) && (!st || status === st);
-            tr.style.display = match ? '' : 'none';
+            tr.style.display = (!q || name.includes(q)) && (!cat || category === cat) ? '' : 'none';
         });
     }
 </script>
