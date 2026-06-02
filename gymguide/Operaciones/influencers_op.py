@@ -38,7 +38,7 @@ async def showInfluencer_ID(db: AsyncSession, id: int, include_inactive: bool = 
 
 
 async def updateInfluencer(db: AsyncSession, id: int, data: dict) -> Optional[InfluencerID]:
-    result = await db.execute(select(InfluencerModel).options(selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id))
+    result = await db.execute(select(InfluencerModel).options(selectinload(InfluencerModel.rutina_recomendada), selectinload(InfluencerModel.suplementos)).where(InfluencerModel.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
