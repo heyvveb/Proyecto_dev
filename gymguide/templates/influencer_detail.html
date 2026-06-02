@@ -14,20 +14,19 @@
         <div style="flex:1;min-width:0">
             <h2 style="margin:0 0 4px">{{ inf.name }}</h2>
             <span class="tag">{{ inf.categoria }}</span>
-            <span class="badge {% if inf.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ inf.status }}</span>
 
-            <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+            <div class="detail-grid" style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px">
             <div class="detail-field">
                 <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Red Social</span>
-                <span class="detail-value" style="color:var(--text);font-size:14px">{{ inf.red_social or '—' }}</span>
+                <span class="detail-value" style="color:var(--text)">{{ inf.red_social or '—' }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Logros</span>
+                <span class="detail-value" style="color:var(--text)">{{ inf.logros or '—' }}</span>
             </div>
             <div class="detail-field">
                 <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Rutina Recomendada</span>
-                <span class="detail-value" style="color:var(--text);font-size:14px">{% if inf.rutina_recomendada_nombre %}<a href="/rutinas/{{ inf.rutina_recomendada_id }}" style="color:var(--cyan)">{{ inf.rutina_recomendada_nombre }}</a>{% else %}—{% endif %}</span>
-            </div>
-            <div class="detail-field" style="grid-column:1/-1">
-                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Logros</span>
-                <span class="detail-value" style="color:var(--text);font-size:14px">{{ inf.logros or '—' }}</span>
+                <span class="detail-value" style="color:var(--text)">{% if inf.rutina_recomendada_nombre %}<a href="/rutinas/{{ inf.rutina_recomendada_id }}" style="color:var(--cyan)">{{ inf.rutina_recomendada_nombre }}</a>{% else %}—{% endif %}</span>
             </div>
         </div>
         </div>
