@@ -3,25 +3,25 @@
 <div class="container">
     <a href="/rutinas" class="cyber-btn cyber-btn-outline cyber-btn-sm mb-24" style="display:inline-flex;align-items:center;gap:6px">← Volver a Rutinas</a>
 
-    <div class="card">
-        <div class="flex-between" style="align-items:flex-start">
-            <div style="display:flex;align-items:center;gap:16px">
-                {% if rut.image_url %}
-                <img src="{{ rut.image_url }}" alt="" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
-                {% endif %}
-                <div>
-                    <h2 style="margin:0 0 4px">{{ rut.name }}</h2>
-                    <span class="tag">{{ rut.level }}</span>
-                    <span class="tag">{{ rut.objective }}</span>
-                    <span class="badge {% if rut.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ rut.status }}</span>
-                </div>
-            </div>
+    <div class="card" style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex-shrink:0">
+            {% if rut.image_url %}
+            <img src="{{ rut.image_url }}" alt="" style="width:200px;height:200px;border-radius:12px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
+            {% else %}
+            <div style="width:200px;height:200px;background:var(--surface-2);border-radius:12px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:48px">📋</div>
+            {% endif %}
         </div>
+        <div style="flex:1;min-width:0">
+            <h2 style="margin:0 0 4px">{{ rut.name }}</h2>
+            <span class="tag">{{ rut.level }}</span>
+            <span class="tag">{{ rut.objective }}</span>
+            <span class="badge {% if rut.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ rut.status }}</span>
 
-        <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
-            <div class="detail-field">
-                <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Duración</span>
-                <span class="detail-value" style="color:var(--text);font-size:14px">{{ rut.duration_weeks }} semanas</span>
+            <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+                <div class="detail-field">
+                    <span class="detail-label" style="color:var(--gray-400);font-size:11px;font-family:'JetBrains Mono',monospace">Duración</span>
+                    <span class="detail-value" style="color:var(--text);font-size:14px">{{ rut.duration_weeks }} semanas</span>
+                </div>
             </div>
         </div>
     </div>
