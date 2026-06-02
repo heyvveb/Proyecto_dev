@@ -65,7 +65,7 @@
                 <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}"
                     data-rutina="{{ (inf.rutina_recomendada_nombre or '')|lower }}"
                     data-suplementos="{% for sid in inf.suplemento_ids %}{{ suplemento_map.get(sid, '')|lower }}{% if not loop.last %},{% endif %}{% endfor %}"
-                    onclick="window.location='/influencers/{{ inf.id }}'" style="cursor:pointer">
+                    onclick="gotoInfluencer({{ inf.id }}, '{{ inf.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -250,6 +250,14 @@
             showToast('Influencer restaurado');
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    function gotoInfluencer(id, status) {
+        if (status === 'inactive') {
+            showToast('No se puede acceder: este influencer fue eliminado', 'error');
+            return;
+        }
+        window.location = '/influencers/' + id;
     }
 
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
