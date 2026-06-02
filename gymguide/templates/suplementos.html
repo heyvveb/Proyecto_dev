@@ -23,14 +23,37 @@
             <option value="vitaminas">Vitaminas</option>
             <option value="fat burner">Fat burner</option>
         </select>
-
+        <select id="filterBrand" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todas marcas</option>
+            {% for b in brands_set|sort %}
+            <option value="{{ b|lower }}">{{ b }}</option>
+            {% endfor %}
+        </select>
+        <select id="filterPrice" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Cualquier precio</option>
+            <option value="0-25">$0 - $25</option>
+            <option value="25-50">$25 - $50</option>
+            <option value="50-100">$50 - $100</option>
+            <option value="100-9999">$100+</option>
+        </select>
     </div>
+
+    {% set brands_set = [] %}
+    {% for s in suplementos %}
+      {% if s.brand and s.brand not in brands_set %}
+        {% set _ = brands_set.append(s.brand) %}
+      {% endif %}
+    {% endfor %}
+
     <div class="table-wrap">
         <table>
             <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for s in suplementos %}
-                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}" onclick="gotoItem({{ s.id }}, '{{ s.status }}')" style="cursor:pointer">
+                <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}"
+                    data-brand="{{ s.brand|lower }}"
+                    data-price="{{ s.price or 0 }}"
+                    onclick="gotoItem({{ s.id }}, '{{ s.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ s.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -132,13 +155,28 @@
     async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Suplemento restaurado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterType')?.addEventListener('change', filterTable);
+    document.getElementById('filterBrand')?.addEventListener('change', filterTable);
+    document.getElementById('filterPrice')?.addEventListener('change', filterTable);
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const tp = document.getElementById('filterType').value.toLowerCase();
+        const br = document.getElementById('filterBrand').value.toLowerCase();
+        const pr = document.getElementById('filterPrice').value;
         document.querySelectorAll('#tableBody tr').forEach(tr => {
             const name = (tr.dataset.name || '').toLowerCase();
             const type = (tr.dataset.type || '').toLowerCase();
-            tr.style.display = (!q || name.includes(q)) && (!tp || type === tp) ? '' : 'none';
+            const brand = (tr.dataset.brand || '').toLowerCase();
+            const price = parseFloat(tr.dataset.price || '0');
+            let priceMatch = true;
+            if (pr) {
+                const [min, max] = pr.split('-').map(Number);
+                priceMatch = isNaN(max) ? price >= min : (price >= min && price <= max);
+            }
+            tr.style.display = (!q || name.includes(q))
+                && (!tp || type === tp)
+                && (!br || brand === br)
+                && priceMatch
+                ? '' : 'none';
         });
     }
 </script>

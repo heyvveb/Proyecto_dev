@@ -20,6 +20,26 @@
             <option value="intermedio">Intermedio</option>
             <option value="avanzado">Avanzado</option>
         </select>
+        <select id="filterObjective" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos objetivos</option>
+            <option value="ganancia muscular">Ganancia Muscular</option>
+            <option value="perdida de grasa">Perdida de grasa</option>
+            <option value="fuerza">Fuerza</option>
+            <option value="resistencia">Resistencia</option>
+        </select>
+        <select id="filterDuration" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Cualquier duración</option>
+            <option value="1-4">1-4 semanas</option>
+            <option value="5-8">5-8 semanas</option>
+            <option value="9-12">9-12 semanas</option>
+            <option value="12-999">12+ semanas</option>
+        </select>
+        <select id="filterEjercicio" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos ejercicios</option>
+            {% for e in all_ejercicios %}
+            <option value="{{ e.name|lower }}">{{ e.name }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     {% set ejercicio_map = {} %}
@@ -30,7 +50,11 @@
             <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Ejercicios</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
                 {% for r in rutinas %}
-                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}" onclick="gotoItem({{ r.id }}, '{{ r.status }}')" style="cursor:pointer">
+                <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}"
+                    data-objective="{{ r.objective|lower }}"
+                    data-duration="{{ r.duration_weeks }}"
+                    data-ejercicios="{% for eid in r.ejercicio_ids %}{{ ejercicio_map.get(eid, '')|lower }}{% if not loop.last %},{% endif %}{% endfor %}"
+                    onclick="gotoItem({{ r.id }}, '{{ r.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ r.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
@@ -183,13 +207,32 @@
 
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterLevel')?.addEventListener('change', filterTable);
+    document.getElementById('filterObjective')?.addEventListener('change', filterTable);
+    document.getElementById('filterDuration')?.addEventListener('change', filterTable);
+    document.getElementById('filterEjercicio')?.addEventListener('change', filterTable);
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const lv = document.getElementById('filterLevel').value.toLowerCase();
+        const obj = document.getElementById('filterObjective').value.toLowerCase();
+        const dur = document.getElementById('filterDuration').value;
+        const ej = document.getElementById('filterEjercicio').value.toLowerCase();
         document.querySelectorAll('#tableBody tr').forEach(tr => {
             const name = (tr.dataset.name || '').toLowerCase();
             const level = (tr.dataset.level || '').toLowerCase();
-            tr.style.display = (!q || name.includes(q)) && (!lv || level === lv) ? '' : 'none';
+            const objective = (tr.dataset.objective || '').toLowerCase();
+            const duration = parseInt(tr.dataset.duration || '0');
+            const ejercicios = (tr.dataset.ejercicios || '').toLowerCase();
+            let durMatch = true;
+            if (dur) {
+                const [min, max] = dur.split('-').map(Number);
+                durMatch = isNaN(max) ? duration >= min : (duration >= min && duration <= max);
+            }
+            tr.style.display = (!q || name.includes(q))
+                && (!lv || level === lv)
+                && (!obj || objective === obj)
+                && durMatch
+                && (!ej || ejercicios.split(',').some(s => s.trim() === ej))
+                ? '' : 'none';
         });
     }
 </script>
