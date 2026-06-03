@@ -1,44 +1,52 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from gymguide.database import get_db
 from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
-from gymguide.models.enums import LevelEnum, ObjectiveEnum
 from gymguide.Operaciones.rutina_OP import *
-
+from gymguide.Operaciones.ejercicio_OP import showEjercicios
+from gymguide.template_utils import render
 
 class EjercicioIdsRequest(BaseModel):
     ejercicio_ids: list[int]
 
-router_rutinas = APIRouter(prefix="/rutinas", tags=["Rutinas"])
+router_rutinas = APIRouter(tags=["Rutinas"])
 
+# --- HTML: listado ---
+@router_rutinas.get("/rutinas", response_class=HTMLResponse)
+async def rutinas_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        rutinas = await showRutinas(db, include_inactive=True)
+        rutinas = [r for r in rutinas if r.status == "inactive"]
+    else:
+        rutinas = await showRutinas(db, include_inactive=False)
+    all_ejercicios = await showEjercicios(db)
+    return render("rutinas.html", {
+        "request": request,
+        "rutinas": rutinas,
+        "all_ejercicios": all_ejercicios,
+        "showing_inactive": showing_inactive
+    })
 
-@router_rutinas.get("", response_model=list[RutinaID])
-async def get_all_rutinas(db: AsyncSession = Depends(get_db)):
-    return await showRutinas(db)
+# --- HTML: detalle ---
+@router_rutinas.get("/rutinas/{id}", response_class=HTMLResponse)
+async def rutina_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    rut = await showRutina_ID(db, id)
+    if not rut:
+        return HTMLResponse("Rutina no encontrada", status_code=404)
+    ejercicios = await get_rutina_ejercicios(db, id)
+    influencers = await get_rutina_influencers(db, id)
+    return render("rutina_detail.html", {
+        "request": request,
+        "rut": rut,
+        "ejercicios": ejercicios,
+        "influencers": influencers
+    })
 
-
-@router_rutinas.get("/deleted", response_model=list[RutinaID])
-async def get_inactive_rutinas(db: AsyncSession = Depends(get_db)):
-    return await showInactiveRutinas(db)
-
-
-@router_rutinas.get("/by-level/{level}", response_model=list[RutinaID])
-async def get_rutinas_by_level(level: LevelEnum, db: AsyncSession = Depends(get_db)):
-    return await showRutinasLevel(db, level.value)
-
-
-@router_rutinas.get("/by-objective/{objective}", response_model=list[RutinaID])
-async def get_rutinas_by_objective(objective: ObjectiveEnum, db: AsyncSession = Depends(get_db)):
-    return await showRutinasObjective(db, objective.value)
-
-
-@router_rutinas.get("/by-name/{name}", response_model=list[RutinaID])
-async def get_rutinas_by_name(name: str, db: AsyncSession = Depends(get_db)):
-    return await showRutinasName(db, name)
-
-
-@router_rutinas.get("/{rutina_id}", response_model=RutinaID)
+# --- JSON: obtener uno ---
+@router_rutinas.get("/api/v1/rutinas/{rutina_id}", response_model=RutinaID)
 async def get_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -47,16 +55,16 @@ async def get_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Rutina not found")
     return rutina
 
-
-@router_rutinas.post("", response_model=RutinaID, status_code=201)
+# --- JSON: crear ---
+@router_rutinas.post("/api/v1/rutinas", response_model=RutinaID, status_code=201)
 async def create_rutina(rutina: Rutina, db: AsyncSession = Depends(get_db)):
     try:
         return await createRutina(db, rutina)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-@router_rutinas.patch("/{rutina_id}", response_model=RutinaID)
+# --- JSON: actualizar ---
+@router_rutinas.patch("/api/v1/rutinas/{rutina_id}", response_model=RutinaID)
 async def update_rutina(rutina_id: int, data: RutinaUpdate, db: AsyncSession = Depends(get_db)):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -65,8 +73,8 @@ async def update_rutina(rutina_id: int, data: RutinaUpdate, db: AsyncSession = D
         raise HTTPException(status_code=404, detail="Rutina not found")
     return updated
 
-
-@router_rutinas.delete("/{rutina_id}", status_code=204)
+# --- JSON: eliminar ---
+@router_rutinas.delete("/api/v1/rutinas/{rutina_id}", status_code=204)
 async def delete_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -74,8 +82,8 @@ async def delete_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Rutina not found")
 
-
-@router_rutinas.put("/{rutina_id}/ejercicios", response_model=RutinaID)
+# --- JSON: asignar ejercicios M:N ---
+@router_rutinas.put("/api/v1/rutinas/{rutina_id}/ejercicios", response_model=RutinaID)
 async def set_rutina_ejercicios_endpoint(rutina_id: int, body: EjercicioIdsRequest, db: AsyncSession = Depends(get_db)):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -84,8 +92,8 @@ async def set_rutina_ejercicios_endpoint(rutina_id: int, body: EjercicioIdsReque
         raise HTTPException(status_code=404, detail="Rutina not found")
     return result
 
-
-@router_rutinas.post("/{rutina_id}/restore", response_model=RutinaID)
+# --- JSON: restaurar ---
+@router_rutinas.post("/api/v1/rutinas/{rutina_id}/restore", response_model=RutinaID)
 async def restore_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     if rutina_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")

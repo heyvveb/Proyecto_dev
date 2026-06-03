@@ -27,9 +27,9 @@ uvicorn main:app --reload
 
 Abrir `http://localhost:8000`
 
-### API
+### Endpoints
 
-Todas las rutas API :
+Todos los endpoints:
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|

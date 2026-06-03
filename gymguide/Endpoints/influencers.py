@@ -1,39 +1,55 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from gymguide.database import get_db
 from gymguide.models.influencer import Influencer, InfluencerID, InfluencerUpdate
-from gymguide.models.enums import CategoriaEnum
 from gymguide.Operaciones.influencers_op import *
-
+from gymguide.Operaciones.suplemento_OP import showSuplementos
+from gymguide.template_utils import render
 
 class SuplementoIdsRequest(BaseModel):
     suplemento_ids: list[int]
 
-router_influencers = APIRouter(prefix="/influencers", tags=["Influencers"])
+router_influencers = APIRouter(tags=["Influencers"])
 
+# --- HTML: listado ---
+@router_influencers.get("/influencers", response_class=HTMLResponse)
+async def influencers_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        influencers = await showInfluencers(db, include_inactive=True)
+        influencers = [r for r in influencers if r.status == "inactive"]
+    else:
+        influencers = await showInfluencers(db, include_inactive=False)
+    all_suplementos = await showSuplementos(db)
+    rutinas_nombres = sorted(set(
+        inf.rutina_recomendada_nombre for inf in influencers
+        if inf.rutina_recomendada_nombre
+    ))
+    return render("influencers.html", {
+        "request": request,
+        "influencers": influencers,
+        "all_suplementos": all_suplementos,
+        "rutinas_nombres": rutinas_nombres,
+        "showing_inactive": showing_inactive
+    })
 
-@router_influencers.get("", response_model=list[InfluencerID])
-async def get_all_influencers(db: AsyncSession = Depends(get_db)):
-    return await showInfluencers(db)
+# --- HTML: detalle ---
+@router_influencers.get("/influencers/{id}", response_class=HTMLResponse)
+async def influencer_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    inf = await showInfluencer_ID(db, id)
+    if not inf:
+        return HTMLResponse("Influencer no encontrado", status_code=404)
+    suplementos = await get_influencer_suplementos(db, id)
+    return render("influencer_detail.html", {
+        "request": request,
+        "inf": inf,
+        "suplementos": suplementos
+    })
 
-
-@router_influencers.get("/deleted", response_model=list[InfluencerID])
-async def get_inactive_influencers(db: AsyncSession = Depends(get_db)):
-    return await showInactiveInfluencers(db)
-
-
-@router_influencers.get("/by-category/{category}", response_model=list[InfluencerID])
-async def get_influencers_by_category(category: CategoriaEnum, db: AsyncSession = Depends(get_db)):
-    return await showInfluencersCategory(db, category.value)
-
-
-@router_influencers.get("/by-name/{name}", response_model=list[InfluencerID])
-async def get_influencers_by_name(name: str, db: AsyncSession = Depends(get_db)):
-    return await showInfluencersName(db, name)
-
-
-@router_influencers.get("/{influencer_id}", response_model=InfluencerID)
+# --- JSON: obtener uno ---
+@router_influencers.get("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
 async def get_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -42,16 +58,16 @@ async def get_influencer(influencer_id: int, db: AsyncSession = Depends(get_db))
         raise HTTPException(status_code=404, detail="Influencer not found")
     return influencer
 
-
-@router_influencers.post("", response_model=InfluencerID, status_code=201)
+# --- JSON: crear ---
+@router_influencers.post("/api/v1/influencers", response_model=InfluencerID, status_code=201)
 async def create_influencer(influencer: Influencer, db: AsyncSession = Depends(get_db)):
     try:
         return await createInfluencer(db, influencer)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-@router_influencers.patch("/{influencer_id}", response_model=InfluencerID)
+# --- JSON: actualizar ---
+@router_influencers.patch("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
 async def update_influencer(influencer_id: int, data: InfluencerUpdate, db: AsyncSession = Depends(get_db)):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -63,8 +79,8 @@ async def update_influencer(influencer_id: int, data: InfluencerUpdate, db: Asyn
         raise HTTPException(status_code=404, detail="Influencer not found")
     return updated
 
-
-@router_influencers.delete("/{influencer_id}", status_code=204)
+# --- JSON: eliminar ---
+@router_influencers.delete("/api/v1/influencers/{influencer_id}", status_code=204)
 async def delete_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -72,8 +88,8 @@ async def delete_influencer(influencer_id: int, db: AsyncSession = Depends(get_d
     if not deleted:
         raise HTTPException(status_code=404, detail="Influencer not found")
 
-
-@router_influencers.put("/{influencer_id}/suplementos", response_model=InfluencerID)
+# --- JSON: asignar suplementos M:N ---
+@router_influencers.put("/api/v1/influencers/{influencer_id}/suplementos", response_model=InfluencerID)
 async def set_influencer_suplementos_endpoint(influencer_id: int, body: SuplementoIdsRequest, db: AsyncSession = Depends(get_db)):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -82,8 +98,8 @@ async def set_influencer_suplementos_endpoint(influencer_id: int, body: Suplemen
         raise HTTPException(status_code=404, detail="Influencer not found")
     return result
 
-
-@router_influencers.post("/{influencer_id}/restore", response_model=InfluencerID)
+# --- JSON: restaurar ---
+@router_influencers.post("/api/v1/influencers/{influencer_id}/restore", response_model=InfluencerID)
 async def restore_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")

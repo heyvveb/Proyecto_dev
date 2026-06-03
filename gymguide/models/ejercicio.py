@@ -1,3 +1,4 @@
+# --- Schema: crear/request (Ejercicio) ---
 from pydantic import BaseModel, Field
 from typing import Optional
 from gymguide.models.enums import GrupoMuscularEnum
@@ -27,9 +28,11 @@ class Ejercicio(BaseModel):
             }
         }
 
+# --- Schema: respuesta con id (EjercicioID) ---
 class EjercicioID(Ejercicio):
     id: int = Field(..., gt=0)
 
+# --- Schema: actualización parcial (EjercicioUpdate) ---
 class EjercicioUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     grupo_muscular: Optional[GrupoMuscularEnum] = None

@@ -1,3 +1,4 @@
+# --- Schema: crear/request (Suplemento) ---
 from pydantic import BaseModel, Field
 from typing import Optional
 from gymguide.models.enums import TipoSuplementoEnum
@@ -25,9 +26,11 @@ class Suplemento(BaseModel):
             }
         }
 
+# --- Schema: respuesta con id (SuplementoID) ---
 class SuplementoID(Suplemento):
     id: int = Field(..., gt=0)
 
+# --- Schema: actualización parcial (SuplementoUpdate) ---
 class SuplementoUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     type: Optional[TipoSuplementoEnum] = None

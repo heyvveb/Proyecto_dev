@@ -1,34 +1,43 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from gymguide.database import get_db
 from gymguide.models.suplemento import Suplemento, SuplementoID, SuplementoUpdate
-from gymguide.models.enums import TipoSuplementoEnum
 from gymguide.Operaciones.suplemento_OP import *
+from gymguide.template_utils import render
 
-router_suplementos = APIRouter(prefix="/suplementos", tags=["Suplementos"])
+router_suplementos = APIRouter(tags=["Suplementos"])
 
+# --- HTML: listado ---
+@router_suplementos.get("/suplementos", response_class=HTMLResponse)
+async def suplementos_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    showing_inactive = status == "inactive"
+    if showing_inactive:
+        suplementos = await showSuplementos(db, include_inactive=True)
+        suplementos = [r for r in suplementos if r.status == "inactive"]
+    else:
+        suplementos = await showSuplementos(db, include_inactive=False)
+    return render("suplementos.html", {
+        "request": request,
+        "suplementos": suplementos,
+        "showing_inactive": showing_inactive
+    })
 
-@router_suplementos.get("", response_model=list[SuplementoID])
-async def get_all_suplementos(db: AsyncSession = Depends(get_db)):
-    return await showSuplementos(db)
+# --- HTML: detalle ---
+@router_suplementos.get("/suplementos/{id}", response_class=HTMLResponse)
+async def suplemento_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    sup = await showSuplemento_ID(db, id)
+    if not sup:
+        return HTMLResponse("Suplemento no encontrado", status_code=404)
+    influencers = await get_suplemento_influencers(db, id)
+    return render("suplemento_detail.html", {
+        "request": request,
+        "sup": sup,
+        "influencers": influencers
+    })
 
-
-@router_suplementos.get("/deleted", response_model=list[SuplementoID])
-async def get_inactive_suplementos(db: AsyncSession = Depends(get_db)):
-    return await showInactiveSuplementos(db)
-
-
-@router_suplementos.get("/by-type/{type}", response_model=list[SuplementoID])
-async def get_suplementos_by_type(type: TipoSuplementoEnum, db: AsyncSession = Depends(get_db)):
-    return await showSuplementosType(db, type.value)
-
-
-@router_suplementos.get("/by-name/{name}", response_model=list[SuplementoID])
-async def get_suplementos_by_name(name: str, db: AsyncSession = Depends(get_db)):
-    return await showSuplementosName(db, name)
-
-
-@router_suplementos.get("/{suplemento_id}", response_model=SuplementoID)
+# --- JSON: obtener uno ---
+@router_suplementos.get("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoID)
 async def get_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db)):
     if suplemento_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -37,16 +46,16 @@ async def get_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db))
         raise HTTPException(status_code=404, detail="Suplemento not found")
     return suplemento
 
-
-@router_suplementos.post("", response_model=SuplementoID, status_code=201)
+# --- JSON: crear ---
+@router_suplementos.post("/api/v1/suplementos", response_model=SuplementoID, status_code=201)
 async def create_suplemento(suplemento: Suplemento, db: AsyncSession = Depends(get_db)):
     try:
         return await createSuplemento(db, suplemento)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-@router_suplementos.patch("/{suplemento_id}", response_model=SuplementoID)
+# --- JSON: actualizar ---
+@router_suplementos.patch("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoID)
 async def update_suplemento(suplemento_id: int, data: SuplementoUpdate, db: AsyncSession = Depends(get_db)):
     if suplemento_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -55,8 +64,8 @@ async def update_suplemento(suplemento_id: int, data: SuplementoUpdate, db: Asyn
         raise HTTPException(status_code=404, detail="Suplemento not found")
     return updated
 
-
-@router_suplementos.delete("/{suplemento_id}", status_code=204)
+# --- JSON: eliminar ---
+@router_suplementos.delete("/api/v1/suplementos/{suplemento_id}", status_code=204)
 async def delete_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db)):
     if suplemento_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
@@ -64,8 +73,8 @@ async def delete_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_d
     if not deleted:
         raise HTTPException(status_code=404, detail="Suplemento not found")
 
-
-@router_suplementos.post("/{suplemento_id}/restore", response_model=SuplementoID)
+# --- JSON: restaurar ---
+@router_suplementos.post("/api/v1/suplementos/{suplemento_id}/restore", response_model=SuplementoID)
 async def restore_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db)):
     if suplemento_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")

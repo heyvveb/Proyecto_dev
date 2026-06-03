@@ -1,3 +1,4 @@
+# --- Tablas asociativas M:N 
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from gymguide.database import Base
@@ -15,6 +16,7 @@ rutina_ejercicio = Table(
 )
 
 
+# --- Modelo: Influencer ---
 class InfluencerModel(Base):
     __tablename__ = "influencers"
 
@@ -31,6 +33,7 @@ class InfluencerModel(Base):
     suplementos = relationship("SuplementoModel", secondary=influencer_suplemento, back_populates="influencers")
 
 
+# --- Modelo: Rutina ---
 class RutinaModel(Base):
     __tablename__ = "rutinas"
 
@@ -46,6 +49,7 @@ class RutinaModel(Base):
     ejercicios = relationship("EjercicioModel", secondary=rutina_ejercicio, back_populates="rutinas")
 
 
+# --- Modelo: Suplemento ---
 class SuplementoModel(Base):
     __tablename__ = "suplementos"
 
@@ -61,6 +65,7 @@ class SuplementoModel(Base):
     influencers = relationship("InfluencerModel", secondary=influencer_suplemento, back_populates="suplementos")
 
 
+# --- Modelo: Ejercicio ---
 class EjercicioModel(Base):
     __tablename__ = "ejercicios"
 

@@ -1,3 +1,4 @@
+# --- Schema: crear/request (Rutina) ---
 from pydantic import BaseModel, Field
 from typing import Optional
 from gymguide.models.enums import LevelEnum, ObjectiveEnum
@@ -23,10 +24,12 @@ class Rutina(BaseModel):
             }
         }
 
+# --- Schema: respuesta con id y relaciones (RutinaID) ---
 class RutinaID(Rutina):
     id: int = Field(..., gt=0)
     ejercicio_ids: list[int] = []
 
+# --- Schema: actualización parcial (RutinaUpdate) ---
 class RutinaUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     level: Optional[LevelEnum] = None

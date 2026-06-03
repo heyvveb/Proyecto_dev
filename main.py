@@ -11,7 +11,6 @@ from gymguide.Endpoints.html_routes import router_html
 from gymguide.database import init_db, async_session
 from gymguide.models.models_sql import InfluencerModel, RutinaModel, SuplementoModel, EjercicioModel
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -19,8 +18,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(router_rutinas, prefix="/api/v1")
-app.include_router(router_influencers, prefix="/api/v1")
-app.include_router(router_suplementos, prefix="/api/v1")
-app.include_router(router_ejercicios, prefix="/api/v1")
+app.include_router(router_influencers)
+app.include_router(router_rutinas)
+app.include_router(router_suplementos)
+app.include_router(router_ejercicios)
 app.include_router(router_html)

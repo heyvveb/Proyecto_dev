@@ -1,3 +1,4 @@
+# --- Enumeraciones para campos de entidades: str + Enum para compatibilidad ---
 from enum import Enum
 
 class CategoriaEnum(str, Enum):
