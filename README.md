@@ -16,7 +16,7 @@ Link: https://proyecto-dev-o39q.onrender.com/
 |------|-------|
 | Backend | FastAPI, SQLModel, Pydantic v2 |
 | Base de datos | PostgreSQL (Neon)|
-| Frontend | Jinja2|
+| Frontend | Jinja2, CSS, JS|
 | Despliegue | Render (uvicorn) |
 
 

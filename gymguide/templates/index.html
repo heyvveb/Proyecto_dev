@@ -2,6 +2,7 @@
 {% block content %}
 <section class="hero-section">
     <div class="floating-icons">
+        <!-- Imagenes flotantes de fondo -->
         <span class="float-icon" style="top:15%;left:10%;animation:float1 3s ease-in-out infinite">
             <img src="https://static.vecteezy.com/system/resources/previews/024/761/304/non_2x/blue-color-yoga-pose-silhouette-design-free-png.png" 
             alt="Gym silueta" 
@@ -33,15 +34,19 @@
             width="40">
         </span>
     </div>
+    <!-- Titulo de la pagina principal -->
     <h1 class="hero-title">
         <span class="line1">Fitness<br></span>
         <span class="line2">Management System</span>
     </h1>
+    <!-- Descripción debajo del titulo -->
     <p class="hero-sub">Plataforma para la gestión y revisión de influencers, rutinas, suplementos y ejercicios con el objetivo de de tener una base para empezar.</p>
     <div style="display:flex;gap:16px;margin-top:32px">
+        <!-- Botones de explorar y dashboard -->
         <a href="/influencers" class="cyber-btn">Explorar</a>
         <a href="/dashboard" class="cyber-btn cyber-btn-outline">Dashboard</a>
     </div>
+    <!-- Cantidad de registros por modelo -->
     <div class="stat-strip">
         <div class="stat-item">
             <div class="num">{{ istats.active }}</div>
@@ -61,10 +66,11 @@
         </div>
     </div>
 </section>
-
+<!-- Modulos del sistema -->
 <div class="container">
     <div class="section-title"><h2>Modulos del <span class="glow-text">Sistema</span></h2><span class="line"></span></div>
     <div class="grid-4">
+        <!-- Influencers -->
         <div class="card" style="text-align:center">
             <div style="font-size:48px;margin-bottom:16px;transition:transform 0.4s var(--easing)">
                 <img 
@@ -77,6 +83,7 @@
             <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Influencers fitness, sus logros y caracteristicas.</p>
             <a href="/influencers" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
         </div>
+        <!-- Rutinas -->
         <div class="card" style="text-align:center">
             <div style="font-size:48px;margin-bottom:16px">
                 <img 
@@ -89,6 +96,7 @@
             <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Rutinas de entrenamiento por nivel y objetivo.</p>
             <a href="/rutinas" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
         </div>
+        <!-- Suplementos -->
         <div class="card" style="text-align:center">
             <div style="font-size:48px;margin-bottom:16px">
                 <img 
@@ -101,6 +109,7 @@
             <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px">Catálogo de suplementos con marcas y beneficios.</p>
             <a href="/suplementos" class="cyber-btn cyber-btn-sm cyber-btn-outline">Gestionar</a>
         </div>
+        <!-- Ejercicios -->
         <div class="card" style="text-align:center">
             <div style="font-size:48px;margin-bottom:16px">
                 <img 
@@ -115,7 +124,7 @@
         </div>
     </div>
 </div>
-
+<!-- Animaciones de las imagenes de fondo -->
 <style>
     @keyframes float1 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     @keyframes float2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
