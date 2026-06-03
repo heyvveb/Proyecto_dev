@@ -3,7 +3,7 @@ from typing import Optional
 from gymguide.models.enums import GrupoMuscularEnum
 from gymguide.models.associations import rutina_ejercicio
 
-
+#Modelo Base
 class Ejercicio(SQLModel, table=True):
     __tablename__ = "ejercicios"
 
@@ -16,10 +16,10 @@ class Ejercicio(SQLModel, table=True):
     descanso_segundos: int = Field(default=60)
     image_url: Optional[str] = Field(default=None, max_length=500)
     status: str = Field(default="active")
-
+    #Lista de rutinas en las que esta ejercicio
     rutinas: list["Rutina"] = Relationship(back_populates="ejercicios", sa_relationship_kwargs={"secondary": rutina_ejercicio})
 
-
+#Actualizar
 class EjercicioUpdate(SQLModel, table=False):
     name: Optional[str] = Field(None, max_length=100)
     grupo_muscular: Optional[GrupoMuscularEnum] = None
@@ -30,7 +30,7 @@ class EjercicioUpdate(SQLModel, table=False):
     image_url: Optional[str] = Field(None, max_length=500)
     status: Optional[str] = Field(None)
 
-
+#Obtención de datos
 class EjercicioRead(SQLModel, table=False):
     id: int
     name: str

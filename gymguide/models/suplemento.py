@@ -4,7 +4,7 @@ from typing import Optional
 from gymguide.models.enums import TipoSuplementoEnum
 from gymguide.models.associations import influencer_suplemento
 
-
+#Suplemento base
 class Suplemento(SQLModel, table=True):
     __tablename__ = "suplementos"
 
@@ -16,10 +16,10 @@ class Suplemento(SQLModel, table=True):
     price: float = Field(default=0)
     image_url: Optional[str] = Field(default=None, max_length=500)
     status: str = Field(default="active")
-
+    #Lista de influencers con este suplemento
     influencers: list["Influencer"] = Relationship(back_populates="suplementos", sa_relationship_kwargs={"secondary": influencer_suplemento})
 
-
+#Actualizar suplemento
 class SuplementoUpdate(SQLModel, table=False):
     name: Optional[str] = Field(None, max_length=100)
     type: Optional[TipoSuplementoEnum] = None
@@ -29,7 +29,7 @@ class SuplementoUpdate(SQLModel, table=False):
     image_url: Optional[str] = Field(None, max_length=500)
     status: Optional[str] = Field(None)
 
-
+#Obtener suplemento
 class SuplementoRead(SQLModel, table=False):
     id: int
     name: str

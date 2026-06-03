@@ -1,6 +1,5 @@
-# --- Enumeraciones para campos de entidades: str + Enum para compatibilidad ---
 from enum import Enum
-
+#Enum de las categorias de influencer
 class CategoriaEnum(str, Enum):
     bodybuilding = "bodybuilding"
     fitness = "fitness"
@@ -9,14 +8,14 @@ class CategoriaEnum(str, Enum):
     yoga = "yoga"
     def __str__(self):
         return self.value
-
+#Enum para los niveles de las rutinas
 class LevelEnum(str, Enum):
     Principiante = "Principiante"
     Intermedio = "Intermedio"
     Avanzado = "Avanzado"
     def __str__(self):
         return self.value
-
+#Enum para el objetivo de las rutinas
 class ObjectiveEnum(str, Enum):
     Ganancia_Muscular = "Ganancia Muscular"
     Perdida_de_grasa = "Perdida de grasa"
@@ -24,7 +23,7 @@ class ObjectiveEnum(str, Enum):
     Resistencia = "Resistencia"
     def __str__(self):
         return self.value
-
+#Enum de los tipos de suplementos
 class TipoSuplementoEnum(str, Enum):
     Proteina = "Proteina"
     Creatina = "Creatina"
@@ -34,7 +33,7 @@ class TipoSuplementoEnum(str, Enum):
     Fat_burner = "Fat burner"
     def __str__(self):
         return self.value
-
+#Enums de los grupos musculares de los ejercicios
 class GrupoMuscularEnum(str, Enum):
     Pecho = "Pecho"
     Espalda = "Espalda"

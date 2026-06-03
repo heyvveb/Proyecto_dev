@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session
 from gymguide.models.rutina import Rutina, RutinaRead, RutinaUpdate
@@ -50,11 +50,6 @@ def deleteRutina(db: Session, id: int) -> Optional[Rutina]:
     row = result.scalar_one_or_none()
     if not row:
         return None
-    db.execute(
-        update(Influencer)
-        .where(Influencer.rutina_recomendada_id == id)
-        .values(rutina_recomendada_id=None)
-    )
     row.status = "inactive"
     db.commit()
     db.refresh(row)
