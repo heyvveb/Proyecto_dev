@@ -13,20 +13,24 @@ class SuplementoIdsRequest(BaseModel):
 
 router_influencers = APIRouter(tags=["Influencers"])
 
-# --- HTML: listado ---
+# Mostrar influencers
 @router_influencers.get("/influencers", response_class=HTMLResponse)
 async def influencers_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    # Verifica si se deben mostrar inactivos
     showing_inactive = status == "inactive"
     if showing_inactive:
         influencers = await showInfluencers(db, include_inactive=True)
         influencers = [r for r in influencers if r.status == "inactive"]
     else:
         influencers = await showInfluencers(db, include_inactive=False)
+    # Obtiene todos los suplementos
     all_suplementos = await showSuplementos(db)
+    # Obtiene nombres únicos de rutinas recomendadas
     rutinas_nombres = sorted(set(
         inf.rutina_recomendada_nombre for inf in influencers
         if inf.rutina_recomendada_nombre
     ))
+    # Renderiza la vista
     return render("influencers.html", {
         "request": request,
         "influencers": influencers,
@@ -35,13 +39,17 @@ async def influencers_page(request: Request, status: str = "active", db: AsyncSe
         "showing_inactive": showing_inactive
     })
 
-# --- HTML: detalle ---
+# Vista en detalle de influencer
 @router_influencers.get("/influencers/{id}", response_class=HTMLResponse)
 async def influencer_detail(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    # Busca el influencer por ID
     inf = await showInfluencer_ID(db, id)
+    # Retorna error si no existe
     if not inf:
         return HTMLResponse("Influencer no encontrado", status_code=404)
+    # Obtiene suplementos asociados
     suplementos = await get_influencer_suplementos(db, id)
+    # Renderiza la vista
     return render("influencer_detail.html", {
         "request": request,
         "inf": inf,
