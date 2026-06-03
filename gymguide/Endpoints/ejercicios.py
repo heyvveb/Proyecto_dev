@@ -8,9 +8,10 @@ from gymguide.template_utils import render
 
 router_ejercicios = APIRouter(tags=["Ejercicios"])
 
-# --- HTML: listado ---
+# Mostrar ejercicios
 @router_ejercicios.get("/ejercicios", response_class=HTMLResponse)
 async def ejercicios_page(request: Request, status: str = "active", db: AsyncSession = Depends(get_db)):
+    # Verifica si se deben mostrar inactivos
     showing_inactive = status == "inactive"
     if showing_inactive:
         ejercicios = await showEjercicios(db, include_inactive=True)
