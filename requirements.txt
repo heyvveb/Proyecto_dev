@@ -5,4 +5,5 @@ sqlalchemy[asyncio]
 sqlmodel>=0.0.22
 psycopg
 psycopg-binary
+psycopg2-binary
 python-dotenv
