@@ -1,41 +1,41 @@
-# --- Schema: crear/request (Suplemento) ---
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, String
 from typing import Optional
 from gymguide.models.enums import TipoSuplementoEnum
+from gymguide.models.associations import influencer_suplemento
 
 
-class Suplemento(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    type: TipoSuplementoEnum
-    brand: str = Field(..., max_length=100)
+class Suplemento(SQLModel, table=True):
+    __tablename__ = "suplementos"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
+    type: TipoSuplementoEnum = Field(sa_column=Column("type", String(50), nullable=False))
+    brand: str = Field(max_length=100)
     benefits: str = ""
-    price: Optional[float] = Field(None, ge=0)
-    image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
+    price: float = Field(default=0)
+    image_url: Optional[str] = Field(default=None, max_length=500)
+    status: str = Field(default="active")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Whey Protein Isolate",
-                "type": "Proteina",
-                "brand": "Optimum Nutrition",
-                "benefits": "Proteina de rápida absorción para la recuperación muscular.",
-                "price": 49.99,
-                "image_url": "https://example.com/whey.jpg",
-                "status": "active"
-            }
-        }
+    influencers: list["Influencer"] = Relationship(back_populates="suplementos", sa_relationship_kwargs={"secondary": influencer_suplemento})
 
-# --- Schema: respuesta con id (SuplementoID) ---
-class SuplementoID(Suplemento):
-    id: int = Field(..., gt=0)
 
-# --- Schema: actualización parcial (SuplementoUpdate) ---
-class SuplementoUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+class SuplementoUpdate(SQLModel, table=False):
+    name: Optional[str] = Field(None, max_length=100)
     type: Optional[TipoSuplementoEnum] = None
     brand: Optional[str] = None
     benefits: Optional[str] = None
     price: Optional[float] = Field(None, ge=0)
     image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    status: Optional[str] = Field(None)
+
+
+class SuplementoRead(SQLModel, table=False):
+    id: int
+    name: str
+    type: str
+    brand: str
+    benefits: str
+    price: float
+    image_url: str
+    status: str

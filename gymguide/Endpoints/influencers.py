@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from gymguide.database import get_db
-from gymguide.models.influencer import Influencer, InfluencerID, InfluencerUpdate
+from gymguide.models.influencer import Influencer, InfluencerRead, InfluencerUpdate
 from gymguide.Operaciones.influencers_op import *
 from gymguide.Operaciones.suplemento_OP import showSuplementos
 from gymguide.template_utils import render
@@ -57,7 +57,7 @@ async def influencer_detail(request: Request, id: int, db: AsyncSession = Depend
     })
 
 # obtener uno 
-@router_influencers.get("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
+@router_influencers.get("/api/v1/influencers/{influencer_id}", response_model=InfluencerRead)
 async def get_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if influencer_id <= 0:
@@ -70,7 +70,7 @@ async def get_influencer(influencer_id: int, db: AsyncSession = Depends(get_db))
     return influencer
 
 # crear 
-@router_influencers.post("/api/v1/influencers", response_model=InfluencerID, status_code=201)
+@router_influencers.post("/api/v1/influencers", response_model=InfluencerRead, status_code=201)
 async def create_influencer(influencer: Influencer, db: AsyncSession = Depends(get_db)):
     try:
         # Crea el influencer
@@ -80,7 +80,7 @@ async def create_influencer(influencer: Influencer, db: AsyncSession = Depends(g
         raise HTTPException(status_code=400, detail=str(e))
 
 # actualizar 
-@router_influencers.patch("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
+@router_influencers.patch("/api/v1/influencers/{influencer_id}", response_model=InfluencerRead)
 async def update_influencer(influencer_id: int, data: InfluencerUpdate, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if influencer_id <= 0:
@@ -109,7 +109,7 @@ async def delete_influencer(influencer_id: int, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="Influencer not found")
 
 # asignar suplementos 
-@router_influencers.put("/api/v1/influencers/{influencer_id}/suplementos", response_model=InfluencerID)
+@router_influencers.put("/api/v1/influencers/{influencer_id}/suplementos", response_model=InfluencerRead)
 async def set_influencer_suplementos_endpoint(influencer_id: int, body: SuplementoIdsRequest, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if influencer_id <= 0:
@@ -122,7 +122,7 @@ async def set_influencer_suplementos_endpoint(influencer_id: int, body: Suplemen
     return result
 
 # restaurar 
-@router_influencers.post("/api/v1/influencers/{influencer_id}/restore", response_model=InfluencerID)
+@router_influencers.post("/api/v1/influencers/{influencer_id}/restore", response_model=InfluencerRead)
 async def restore_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if influencer_id <= 0:

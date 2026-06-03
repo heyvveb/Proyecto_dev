@@ -1,45 +1,45 @@
-# --- Schema: crear/request (Influencer) ---
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from gymguide.models.enums import CategoriaEnum
+from gymguide.models.associations import influencer_suplemento
 
 
-class Influencer(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
+class Influencer(SQLModel, table=True):
+    __tablename__ = "influencers"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
     categoria: CategoriaEnum
     logros: str = ""
     red_social: str = ""
-    rutina_recomendada_id: Optional[int] = None
-    image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
+    rutina_recomendada_id: Optional[int] = Field(default=None, foreign_key="rutinas.id")
+    image_url: Optional[str] = Field(default=None, max_length=500)
+    status: str = Field(default="active")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Chris Bumstead",
-                "categoria": "bodybuilding",
-                "logros": "Mr. Olympia Classic Physique 2024",
-                "red_social": "@cbum",
-                "rutina_recomendada_id": 1,
-                "image_url": "https://example.com/cbum.jpg",
-                "status": "active"
-            }
-        }
+    rutina_recomendada: Optional["Rutina"] = Relationship(back_populates="influencers")
+    suplementos: list["Suplemento"] = Relationship(back_populates="influencers", sa_relationship_kwargs={"secondary": influencer_suplemento})
 
-# --- Schema: respuesta con id y relaciones (InfluencerID) ---
-class InfluencerID(Influencer):
-    id: int = Field(..., gt=0)
-    rutina_recomendada_nombre: Optional[str] = None
-    suplemento_ids: list[int] = []
 
-# --- Schema: actualización parcial (InfluencerUpdate) ---
-class InfluencerUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+class InfluencerUpdate(SQLModel, table=False):
+    name: Optional[str] = Field(None, max_length=100)
     categoria: Optional[CategoriaEnum] = None
     logros: Optional[str] = None
     red_social: Optional[str] = None
     rutina_recomendada_id: Optional[int] = None
+    image_url: Optional[str] = Field(None, max_length=500)
+    status: Optional[str] = Field(None)
     rutina_recomendada_nombre: Optional[str] = None
     suplemento_ids: Optional[list[int]] = None
-    image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+
+
+class InfluencerRead(SQLModel, table=False):
+    id: int
+    name: str
+    categoria: CategoriaEnum
+    logros: str
+    red_social: str
+    rutina_recomendada_id: Optional[int] = None
+    rutina_recomendada_nombre: Optional[str] = None
+    suplemento_ids: list[int] = []
+    image_url: str
+    status: str

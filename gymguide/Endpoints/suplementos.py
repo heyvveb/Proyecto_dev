@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from gymguide.database import get_db
-from gymguide.models.suplemento import Suplemento, SuplementoID, SuplementoUpdate
+from gymguide.models.suplemento import Suplemento, SuplementoRead, SuplementoUpdate
 from gymguide.Operaciones.suplemento_OP import *
 from gymguide.template_utils import render
 
@@ -43,7 +43,7 @@ async def suplemento_detail(request: Request, id: int, db: AsyncSession = Depend
     })
 
 # obtener uno 
-@router_suplementos.get("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoID)
+@router_suplementos.get("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoRead)
 async def get_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if suplemento_id <= 0:
@@ -56,7 +56,7 @@ async def get_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db))
     return suplemento
 
 # crear 
-@router_suplementos.post("/api/v1/suplementos", response_model=SuplementoID, status_code=201)
+@router_suplementos.post("/api/v1/suplementos", response_model=SuplementoRead, status_code=201)
 async def create_suplemento(suplemento: Suplemento, db: AsyncSession = Depends(get_db)):
     try:
         # Crea el suplemento
@@ -66,7 +66,7 @@ async def create_suplemento(suplemento: Suplemento, db: AsyncSession = Depends(g
         raise HTTPException(status_code=400, detail=str(e))
 
 # actualizar 
-@router_suplementos.patch("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoID)
+@router_suplementos.patch("/api/v1/suplementos/{suplemento_id}", response_model=SuplementoRead)
 async def update_suplemento(suplemento_id: int, data: SuplementoUpdate, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if suplemento_id <= 0:
@@ -91,7 +91,7 @@ async def delete_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="Suplemento not found")
 
 # restaurar 
-@router_suplementos.post("/api/v1/suplementos/{suplemento_id}/restore", response_model=SuplementoID)
+@router_suplementos.post("/api/v1/suplementos/{suplemento_id}/restore", response_model=SuplementoRead)
 async def restore_suplemento(suplemento_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if suplemento_id <= 0:

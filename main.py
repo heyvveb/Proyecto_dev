@@ -1,5 +1,9 @@
 import sys
 import asyncio
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -9,7 +13,6 @@ from gymguide.Endpoints.suplementos import router_suplementos
 from gymguide.Endpoints.ejercicios import router_ejercicios
 from gymguide.Endpoints.html_routes import router_html
 from gymguide.database import init_db, async_session
-from gymguide.models.models_sql import InfluencerModel, RutinaModel, SuplementoModel, EjercicioModel
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -1,44 +1,43 @@
-# --- Schema: crear/request (Ejercicio) ---
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from gymguide.models.enums import GrupoMuscularEnum
+from gymguide.models.associations import rutina_ejercicio
 
 
-class Ejercicio(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
+class Ejercicio(SQLModel, table=True):
+    __tablename__ = "ejercicios"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
     grupo_muscular: GrupoMuscularEnum
     descripcion: str = ""
-    series: int = Field(default=3, ge=1, le=20)
-    repeticiones: int = Field(default=10, ge=1, le=100)
-    descanso_segundos: int = Field(default=60, ge=0, le=600)
-    image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
+    series: int = Field(default=3)
+    repeticiones: int = Field(default=10)
+    descanso_segundos: int = Field(default=60)
+    image_url: Optional[str] = Field(default=None, max_length=500)
+    status: str = Field(default="active")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Press de Banca",
-                "grupo_muscular": "Pecho",
-                "descripcion": "Ejercicio compuesto para pectorales, hombros y tríceps.",
-                "series": 4,
-                "repeticiones": 10,
-                "descanso_segundos": 90,
-                "image_url": "https://example.com/benchpress.jpg",
-                "status": "active"
-            }
-        }
+    rutinas: list["Rutina"] = Relationship(back_populates="ejercicios", sa_relationship_kwargs={"secondary": rutina_ejercicio})
 
-# --- Schema: respuesta con id (EjercicioID) ---
-class EjercicioID(Ejercicio):
-    id: int = Field(..., gt=0)
 
-# --- Schema: actualización parcial (EjercicioUpdate) ---
-class EjercicioUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+class EjercicioUpdate(SQLModel, table=False):
+    name: Optional[str] = Field(None, max_length=100)
     grupo_muscular: Optional[GrupoMuscularEnum] = None
     descripcion: Optional[str] = None
-    series: Optional[int] = Field(None, ge=1, le=20)
-    repeticiones: Optional[int] = Field(None, ge=1, le=100)
-    descanso_segundos: Optional[int] = Field(None, ge=0, le=600)
+    series: Optional[int] = None
+    repeticiones: Optional[int] = None
+    descanso_segundos: Optional[int] = None
     image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    status: Optional[str] = Field(None)
+
+
+class EjercicioRead(SQLModel, table=False):
+    id: int
+    name: str
+    grupo_muscular: GrupoMuscularEnum
+    descripcion: str
+    series: int
+    repeticiones: int
+    descanso_segundos: int
+    image_url: str
+    status: str

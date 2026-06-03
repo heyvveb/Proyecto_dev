@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from gymguide.database import get_db
-from gymguide.models.ejercicio import Ejercicio, EjercicioID, EjercicioUpdate
+from gymguide.models.ejercicio import Ejercicio, EjercicioRead, EjercicioUpdate
 from gymguide.Operaciones.ejercicio_OP import *
 from gymguide.template_utils import render
 
@@ -43,7 +43,7 @@ async def ejercicio_detail(request: Request, id: int, db: AsyncSession = Depends
     })
 
 # Obtener uno
-@router_ejercicios.get("/api/v1/ejercicios/{ejercicio_id}", response_model=EjercicioID)
+@router_ejercicios.get("/api/v1/ejercicios/{ejercicio_id}", response_model=EjercicioRead)
 async def get_ejercicio(ejercicio_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if ejercicio_id <= 0:
@@ -56,7 +56,7 @@ async def get_ejercicio(ejercicio_id: int, db: AsyncSession = Depends(get_db)):
     return ejercicio
 
 # Crear
-@router_ejercicios.post("/api/v1/ejercicios", response_model=EjercicioID, status_code=201)
+@router_ejercicios.post("/api/v1/ejercicios", response_model=EjercicioRead, status_code=201)
 async def create_ejercicio(ejercicio: Ejercicio, db: AsyncSession = Depends(get_db)):
     try:
         # Crea el ejercicio en la BD
@@ -66,7 +66,7 @@ async def create_ejercicio(ejercicio: Ejercicio, db: AsyncSession = Depends(get_
         raise HTTPException(status_code=400, detail=str(e))
 
 # actualizar
-@router_ejercicios.patch("/api/v1/ejercicios/{ejercicio_id}", response_model=EjercicioID)
+@router_ejercicios.patch("/api/v1/ejercicios/{ejercicio_id}", response_model=EjercicioRead)
 async def update_ejercicio(ejercicio_id: int, data: EjercicioUpdate, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if ejercicio_id <= 0:
@@ -91,7 +91,7 @@ async def delete_ejercicio(ejercicio_id: int, db: AsyncSession = Depends(get_db)
         raise HTTPException(status_code=404, detail="Ejercicio not found")
 
 # restaurar 
-@router_ejercicios.post("/api/v1/ejercicios/{ejercicio_id}/restore", response_model=EjercicioID)
+@router_ejercicios.post("/api/v1/ejercicios/{ejercicio_id}/restore", response_model=EjercicioRead)
 async def restore_ejercicio(ejercicio_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if ejercicio_id <= 0:

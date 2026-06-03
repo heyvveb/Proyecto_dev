@@ -1,41 +1,39 @@
-# --- CRUD asíncrono: Suplementos ---
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from gymguide.models.models_sql import SuplementoModel, InfluencerModel
-from gymguide.models.suplemento import Suplemento, SuplementoID, SuplementoUpdate
-from gymguide.models.influencer import InfluencerID
+from gymguide.models.suplemento import Suplemento, SuplementoRead, SuplementoUpdate
+from gymguide.models.influencer import Influencer, InfluencerRead
 from typing import Optional
 
-# --- createSuplemento: crear registro ---
-async def createSuplemento(db: AsyncSession, suplemento: Suplemento) -> SuplementoID:
-    model = SuplementoModel(**suplemento.model_dump())
+
+async def createSuplemento(db: AsyncSession, suplemento: Suplemento) -> SuplementoRead:
+    model = Suplemento(**suplemento.model_dump())
     db.add(model)
     await db.commit()
     await db.refresh(model)
-    return SuplementoID(id=model.id, **suplemento.model_dump())
+    return _row_to_read(model)
 
-# --- showSuplementos: listar todos ---
-async def showSuplementos(db: AsyncSession, include_inactive: bool = False) -> list[SuplementoID]:
-    query = select(SuplementoModel)
+
+async def showSuplementos(db: AsyncSession, include_inactive: bool = False) -> list[SuplementoRead]:
+    query = select(Suplemento)
     if not include_inactive:
-        query = query.where(SuplementoModel.status == "active")
-    result = await db.execute(query.order_by(SuplementoModel.id))
+        query = query.where(Suplemento.status == "active")
+    result = await db.execute(query.order_by(Suplemento.id))
     rows = result.scalars().all()
-    return [_row_to_id(r) for r in rows]
+    return [_row_to_read(r) for r in rows]
 
-# --- showSuplemento_ID: obtener uno por ID ---
-async def showSuplemento_ID(db: AsyncSession, id: int, include_inactive: bool = False) -> Optional[SuplementoID]:
-    query = select(SuplementoModel).where(SuplementoModel.id == id)
+
+async def showSuplemento_ID(db: AsyncSession, id: int, include_inactive: bool = False) -> Optional[SuplementoRead]:
+    query = select(Suplemento).where(Suplemento.id == id)
     if not include_inactive:
-        query = query.where(SuplementoModel.status == "active")
+        query = query.where(Suplemento.status == "active")
     result = await db.execute(query)
     row = result.scalar_one_or_none()
-    return _row_to_id(row) if row else None
+    return _row_to_read(row) if row else None
 
-# --- updateSuplemento: actualizar campos ---
-async def updateSuplemento(db: AsyncSession, id: int, data: dict) -> Optional[SuplementoID]:
-    result = await db.execute(select(SuplementoModel).where(SuplementoModel.id == id))
+
+async def updateSuplemento(db: AsyncSession, id: int, data: dict) -> Optional[SuplementoRead]:
+    result = await db.execute(select(Suplemento).where(Suplemento.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
@@ -43,54 +41,54 @@ async def updateSuplemento(db: AsyncSession, id: int, data: dict) -> Optional[Su
         setattr(row, key, val)
     await db.commit()
     await db.refresh(row)
-    return _row_to_id(row)
+    return _row_to_read(row)
 
-# --- deleteSuplemento: soft-delete ---
+
 async def deleteSuplemento(db: AsyncSession, id: int) -> Optional[Suplemento]:
-    result = await db.execute(select(SuplementoModel).where(SuplementoModel.id == id))
+    result = await db.execute(select(Suplemento).where(Suplemento.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "inactive"
     await db.commit()
     await db.refresh(row)
-    return _row_to_suplemento(row)
+    return row
 
-# --- showSuplementosType: filtrar por tipo ---
-async def showSuplementosType(db: AsyncSession, type: str) -> list[SuplementoID]:
+
+async def showSuplementosType(db: AsyncSession, type: str) -> list[SuplementoRead]:
     result = await db.execute(
-        select(SuplementoModel).where(SuplementoModel.type.ilike(type), SuplementoModel.status == "active").order_by(SuplementoModel.id)
+        select(Suplemento).where(Suplemento.type.ilike(type), Suplemento.status == "active").order_by(Suplemento.id)
     )
-    return [_row_to_id(r) for r in result.scalars().all()]
+    return [_row_to_read(r) for r in result.scalars().all()]
 
-# --- showSuplementosName: buscar por nombre ---
-async def showSuplementosName(db: AsyncSession, name: str) -> list[SuplementoID]:
+
+async def showSuplementosName(db: AsyncSession, name: str) -> list[SuplementoRead]:
     result = await db.execute(
-        select(SuplementoModel).where(SuplementoModel.name.ilike(f"%{name}%"), SuplementoModel.status == "active").order_by(SuplementoModel.id)
+        select(Suplemento).where(Suplemento.name.ilike(f"%{name}%"), Suplemento.status == "active").order_by(Suplemento.id)
     )
-    return [_row_to_id(r) for r in result.scalars().all()]
+    return [_row_to_read(r) for r in result.scalars().all()]
 
-# --- showInactiveSuplementos: listar solo eliminados ---
-async def showInactiveSuplementos(db: AsyncSession) -> list[SuplementoID]:
+
+async def showInactiveSuplementos(db: AsyncSession) -> list[SuplementoRead]:
     result = await db.execute(
-        select(SuplementoModel).where(SuplementoModel.status == "inactive").order_by(SuplementoModel.id)
+        select(Suplemento).where(Suplemento.status == "inactive").order_by(Suplemento.id)
     )
-    return [_row_to_id(r) for r in result.scalars().all()]
+    return [_row_to_read(r) for r in result.scalars().all()]
 
-# --- restoreSuplemento: reactivar ---
-async def restoreSuplemento(db: AsyncSession, id: int) -> Optional[SuplementoID]:
-    result = await db.execute(select(SuplementoModel).where(SuplementoModel.id == id, SuplementoModel.status == "inactive"))
+
+async def restoreSuplemento(db: AsyncSession, id: int) -> Optional[SuplementoRead]:
+    result = await db.execute(select(Suplemento).where(Suplemento.id == id, Suplemento.status == "inactive"))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "active"
     await db.commit()
     await db.refresh(row)
-    return _row_to_id(row)
+    return _row_to_read(row)
 
-# --- get_suplemento_stats: conteos para dashboard ---
+
 async def get_suplemento_stats(db: AsyncSession) -> dict:
-    total = await db.execute(select(SuplementoModel))
+    total = await db.execute(select(Suplemento))
     all_rows = total.scalars().all()
     active = sum(1 for r in all_rows if r.status == "active")
     inactive = sum(1 for r in all_rows if r.status == "inactive")
@@ -100,11 +98,10 @@ async def get_suplemento_stats(db: AsyncSession) -> dict:
             by_type[r.type] = by_type.get(r.type, 0) + 1
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_type": by_type}
 
-# --- get_suplemento_influencers: obtener influencers activos que usan este suplemento ---
-# selectinload anidado evita lazy load al acceder a inf.rutina_recomendada.name
-async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> list[InfluencerID]:
+
+async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> list[InfluencerRead]:
     result = await db.execute(
-        select(SuplementoModel).options(selectinload(SuplementoModel.influencers).selectinload(InfluencerModel.rutina_recomendada)).where(SuplementoModel.id == suplemento_id)
+        select(Suplemento).options(selectinload(Suplemento.influencers).selectinload(Influencer.rutina_recomendada)).where(Suplemento.id == suplemento_id)
     )
     row = result.scalar_one_or_none()
     if not row:
@@ -114,7 +111,7 @@ async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> li
         if inf.status != "active":
             continue
         rutina_nombre = inf.rutina_recomendada.name if inf.rutina_recomendada else None
-        out.append(InfluencerID(
+        out.append(InfluencerRead(
             id=inf.id, name=inf.name, categoria=inf.categoria,
             logros=inf.logros or "", red_social=inf.red_social or "",
             rutina_recomendada_id=inf.rutina_recomendada_id,
@@ -123,22 +120,10 @@ async def get_suplemento_influencers(db: AsyncSession, suplemento_id: int) -> li
         ))
     return out
 
-# --- _row_to_id: convertir modelo -> Pydantic ---
-def _row_to_id(row: SuplementoModel) -> SuplementoID:
-    return SuplementoID(
-        id=row.id,
-        name=row.name,
-        type=row.type,
-        brand=row.brand,
-        benefits=row.benefits or "",
-        price=row.price,
-        image_url=row.image_url or "",
-        status=row.status
-    )
 
-# --- _row_to_suplemento: convertir modelo -> Pydantic base ---
-def _row_to_suplemento(row: SuplementoModel) -> Suplemento:
-    return Suplemento(
+def _row_to_read(row: Suplemento) -> SuplementoRead:
+    return SuplementoRead(
+        id=row.id,
         name=row.name,
         type=row.type,
         brand=row.brand,

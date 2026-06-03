@@ -2,6 +2,7 @@ fastapi
 uvicorn
 jinja2>=3.1.2,<3.2
 sqlalchemy[asyncio]
+sqlmodel>=0.0.22
 psycopg
 psycopg-binary
 python-dotenv

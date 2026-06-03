@@ -1,40 +1,42 @@
-# --- Schema: crear/request (Rutina) ---
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Column
 from typing import Optional
 from gymguide.models.enums import LevelEnum, ObjectiveEnum
+from gymguide.models.associations import rutina_ejercicio
 
 
-class Rutina(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
+class Rutina(SQLModel, table=True):
+    __tablename__ = "rutinas"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
     level: LevelEnum
-    objective: ObjectiveEnum
-    duration_weeks: int = Field(..., ge=1, le=52)
-    image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(default="active", pattern="^(active|inactive)$")
+    objective: ObjectiveEnum = Field(sa_column=Column(SAEnum(ObjectiveEnum, values_callable=lambda x: [e.value for e in x])))
+    duration_weeks: int
+    image_url: Optional[str] = Field(default=None, max_length=500)
+    status: str = Field(default="active")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Programa de Hipertrofia",
-                "level": "Intermedio",
-                "objective": "Ganancia Muscular",
-                "duration_weeks": 12,
-                "image_url": "https://example.com/rutina.jpg",
-                "status": "active"
-            }
-        }
+    influencers: list["Influencer"] = Relationship(back_populates="rutina_recomendada")
+    ejercicios: list["Ejercicio"] = Relationship(back_populates="rutinas", sa_relationship_kwargs={"secondary": rutina_ejercicio})
 
-# --- Schema: respuesta con id y relaciones (RutinaID) ---
-class RutinaID(Rutina):
-    id: int = Field(..., gt=0)
-    ejercicio_ids: list[int] = []
 
-# --- Schema: actualización parcial (RutinaUpdate) ---
-class RutinaUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+class RutinaUpdate(SQLModel, table=False):
+    name: Optional[str] = Field(None, max_length=100)
     level: Optional[LevelEnum] = None
     objective: Optional[ObjectiveEnum] = None
-    duration_weeks: Optional[int] = Field(None, ge=1, le=52)
+    duration_weeks: Optional[int] = None
     image_url: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    status: Optional[str] = Field(None)
     ejercicio_ids: Optional[list[int]] = None
+
+
+class RutinaRead(SQLModel, table=False):
+    id: int
+    name: str
+    level: LevelEnum
+    objective: ObjectiveEnum
+    duration_weeks: int
+    ejercicio_ids: list[int] = []
+    image_url: str
+    status: str

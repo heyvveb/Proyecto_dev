@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from gymguide.database import get_db
-from gymguide.models.rutina import Rutina, RutinaID, RutinaUpdate
+from gymguide.models.rutina import Rutina, RutinaRead, RutinaUpdate
 from gymguide.Operaciones.rutina_OP import *
 from gymguide.Operaciones.ejercicio_OP import showEjercicios
 from gymguide.template_utils import render
@@ -53,7 +53,7 @@ async def rutina_detail(request: Request, id: int, db: AsyncSession = Depends(ge
     })
 
 # obtener uno 
-@router_rutinas.get("/api/v1/rutinas/{rutina_id}", response_model=RutinaID)
+@router_rutinas.get("/api/v1/rutinas/{rutina_id}", response_model=RutinaRead)
 async def get_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if rutina_id <= 0:
@@ -66,7 +66,7 @@ async def get_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     return rutina
 
 # crear 
-@router_rutinas.post("/api/v1/rutinas", response_model=RutinaID, status_code=201)
+@router_rutinas.post("/api/v1/rutinas", response_model=RutinaRead, status_code=201)
 async def create_rutina(rutina: Rutina, db: AsyncSession = Depends(get_db)):
     try:
         # Crea la rutina
@@ -76,7 +76,7 @@ async def create_rutina(rutina: Rutina, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 # actualizar 
-@router_rutinas.patch("/api/v1/rutinas/{rutina_id}", response_model=RutinaID)
+@router_rutinas.patch("/api/v1/rutinas/{rutina_id}", response_model=RutinaRead)
 async def update_rutina(rutina_id: int, data: RutinaUpdate, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if rutina_id <= 0:
@@ -101,7 +101,7 @@ async def delete_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Rutina not found")
 
 # asignar ejercicios 
-@router_rutinas.put("/api/v1/rutinas/{rutina_id}/ejercicios", response_model=RutinaID)
+@router_rutinas.put("/api/v1/rutinas/{rutina_id}/ejercicios", response_model=RutinaRead)
 async def set_rutina_ejercicios_endpoint(rutina_id: int, body: EjercicioIdsRequest, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if rutina_id <= 0:
@@ -114,7 +114,7 @@ async def set_rutina_ejercicios_endpoint(rutina_id: int, body: EjercicioIdsReque
     return result
 
 # restaurar 
-@router_rutinas.post("/api/v1/rutinas/{rutina_id}/restore", response_model=RutinaID)
+@router_rutinas.post("/api/v1/rutinas/{rutina_id}/restore", response_model=RutinaRead)
 async def restore_rutina(rutina_id: int, db: AsyncSession = Depends(get_db)):
     # Valida que el ID sea positivo
     if rutina_id <= 0:
