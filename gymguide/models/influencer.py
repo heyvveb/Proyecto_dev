@@ -12,7 +12,7 @@ class Influencer(SQLModel, table=True):
     categoria: CategoriaEnum
     logros: str = ""
     red_social: str = ""
-    rutina_recomendada_id: Optional[int] = Field(default=None, foreign_key="rutinas.id")
+    rutina_recomendada_id: Optional[int] = Field(default=None, foreign_key="rutinas.id", ondelete="SET NULL")
     image_url: Optional[str] = Field(default=None, max_length=500)
     status: str = Field(default="active")
 

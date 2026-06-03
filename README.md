@@ -1,6 +1,7 @@
 # GymGuide
 
 Plataforma web de gestión de entrenamiento: influencers, rutinas, suplementos y ejercicios.
+Link: https://proyecto-dev-o39q.onrender.com/
 ## Entidades
 
 - **Influencers** — perfiles con categoría, logros, rutina recomendada y suplementos asociados
@@ -13,7 +14,7 @@ Plataforma web de gestión de entrenamiento: influencers, rutinas, suplementos y
 
 | Capa | Stack |
 |------|-------|
-| Backend | FastAPI, SQLAlchemy 2.0 (async), Pydantic v2 |
+| Backend | FastAPI, SQLModel, Pydantic v2 |
 | Base de datos | PostgreSQL (Neon)|
 | Frontend | Jinja2|
 | Despliegue | Render (uvicorn) |
@@ -24,8 +25,6 @@ Plataforma web de gestión de entrenamiento: influencers, rutinas, suplementos y
 ```bash
 uvicorn main:app --reload
 ```
-
-Abrir `http://localhost:8000`
 
 ### Endpoints
 
