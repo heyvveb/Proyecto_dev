@@ -1,8 +1,8 @@
 # GymGuide
 
-Plataforma web de gestión de entrenamiento: influencers, rutinas, suplementos y ejercicios.
+Plataforma web de gestión de entrenamiento: influencers, rutinas, suplementos y ejercicios
 Link: https://proyecto-dev-o39q.onrender.com/
-## Entidades
+## Modelos
 
 - **Influencers** — perfiles con categoría, logros, rutina recomendada y suplementos asociados
 - **Rutinas** — programas de entrenamiento con nivel, objetivo, duración y ejercicios asignados
