@@ -56,62 +56,80 @@ async def influencer_detail(request: Request, id: int, db: AsyncSession = Depend
         "suplementos": suplementos
     })
 
-# --- JSON: obtener uno ---
+# obtener uno 
 @router_influencers.get("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
 async def get_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
+    # Valida que el ID sea positivo
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    # Busca el influence
     influencer = await showInfluencer_ID(db, influencer_id)
+    # Retorna error si no existe
     if not influencer:
         raise HTTPException(status_code=404, detail="Influencer not found")
     return influencer
 
-# --- JSON: crear ---
+# crear 
 @router_influencers.post("/api/v1/influencers", response_model=InfluencerID, status_code=201)
 async def create_influencer(influencer: Influencer, db: AsyncSession = Depends(get_db)):
     try:
+        # Crea el influencer
         return await createInfluencer(db, influencer)
+    # Maneja errores de validación
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# --- JSON: actualizar ---
+# actualizar 
 @router_influencers.patch("/api/v1/influencers/{influencer_id}", response_model=InfluencerID)
 async def update_influencer(influencer_id: int, data: InfluencerUpdate, db: AsyncSession = Depends(get_db)):
+    # Valida que el ID sea positivo
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
     try:
+        # Actualiza el influencer
         updated = await updateInfluencer(db, influencer_id, data.model_dump(exclude_unset=True))
+   # Maneja errores de validación
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    # Retorna error si no existe
     if not updated:
         raise HTTPException(status_code=404, detail="Influencer not found")
     return updated
 
-# --- JSON: eliminar ---
+# eliminar 
 @router_influencers.delete("/api/v1/influencers/{influencer_id}", status_code=204)
 async def delete_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
+    # Valida que el ID sea positivo
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    # Elimina el influencer
     deleted = await deleteInfluencer(db, influencer_id)
+    # Retorna error si no existe
     if not deleted:
         raise HTTPException(status_code=404, detail="Influencer not found")
 
-# --- JSON: asignar suplementos M:N ---
+# asignar suplementos 
 @router_influencers.put("/api/v1/influencers/{influencer_id}/suplementos", response_model=InfluencerID)
 async def set_influencer_suplementos_endpoint(influencer_id: int, body: SuplementoIdsRequest, db: AsyncSession = Depends(get_db)):
+    # Valida que el ID sea positivo
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    # Asigna los suplementos al influencer
     result = await set_influencer_suplementos(db, influencer_id, body.suplemento_ids)
+    # Retorna error si no existe
     if not result:
         raise HTTPException(status_code=404, detail="Influencer not found")
     return result
 
-# --- JSON: restaurar ---
+# restaurar 
 @router_influencers.post("/api/v1/influencers/{influencer_id}/restore", response_model=InfluencerID)
 async def restore_influencer(influencer_id: int, db: AsyncSession = Depends(get_db)):
+    # Valida que el ID sea positivo
     if influencer_id <= 0:
         raise HTTPException(status_code=400, detail="ID must be a positive integer")
+    # Restaura el influencer
     restored = await restoreInfluencer(db, influencer_id)
+    # Retorna error si no existe o ya está activo
     if not restored:
         raise HTTPException(status_code=404, detail="Influencer not found or already active")
     return restored
