@@ -4,22 +4,29 @@
     <div class="flex-between mb-24">
         <div class="section-title" style="margin:0"><h2>Rutinas</h2><span class="line"></span></div>
         <div style="display:flex;gap:8px">
-            <button class="cyber-btn" onclick="openModal('createModal')">+ Nueva</button>
+            <!-- Si esta en activos o no -->
             {% if showing_inactive %}
+            <!-- Boton de volver a activos -->
             <a href="/rutinas" class="cyber-btn cyber-btn-outline">← Ver activos</a>
             {% else %}
+            <!-- Boton de crear -->
+            <button class="cyber-btn" onclick="openModal('createModal')">+ Nueva</button>
+            <!-- Boton ver inactivos -->
             <a href="/rutinas?status=inactive" class="cyber-btn cyber-btn-outline">🗑 Ver eliminados</a>
             {% endif %}
         </div>
     </div>
     <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Busqueda -->
         <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <!-- Filtro por grupo nivel -->
         <select id="filterLevel" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos niveles</option>
             <option value="principiante">Principiante</option>
             <option value="intermedio">Intermedio</option>
             <option value="avanzado">Avanzado</option>
         </select>
+        <!-- Filtro por grupo objetivo -->
         <select id="filterObjective" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos objetivos</option>
             <option value="ganancia muscular">Ganancia Muscular</option>
@@ -27,6 +34,7 @@
             <option value="fuerza">Fuerza</option>
             <option value="resistencia">Resistencia</option>
         </select>
+        <!-- Filtro por grupo duración -->
         <select id="filterDuration" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Cualquier duración</option>
             <option value="1-4">1-4 semanas</option>
@@ -34,6 +42,7 @@
             <option value="9-12">9-12 semanas</option>
             <option value="12-999">12+ semanas</option>
         </select>
+        <!-- Filtro por grupo EJercicio -->
         <select id="filterEjercicio" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos ejercicios</option>
             {% for e in all_ejercicios %}
@@ -41,14 +50,15 @@
             {% endfor %}
         </select>
     </div>
-
+    <!-- mapa del ID de cada ejercicio a su nombre -->
     {% set ejercicio_map = {} %}
     {% for e in all_ejercicios %}{% set _ = ejercicio_map.__setitem__(e.id, e.name) %}{% endfor %}
-
+    <!-- Tabla de Rutinas -->
     <div class="table-wrap">
         <table>
             <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th><th>Ejercicios</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
+                <!-- Para cada influencer -->
                 {% for r in rutinas %}
                 <tr data-id="{{ r.id }}" data-name="{{ r.name|lower }}" data-level="{{ r.level|lower }}"
                     data-objective="{{ r.objective|lower }}"
@@ -58,6 +68,7 @@
                     <td><span class="mono-label">{{ r.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
+                            <!-- Imagen subida -->
                             {% if r.image_url %}<img src="{{ r.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/256/5606/5606891.png"
@@ -68,21 +79,26 @@
                             <strong>{{ r.name }}</strong>
                         </div>
                     </td>
+                    <!-- Datos -->
                     <td><span class="tag">{{ r.level }}</span></td>
                     <td>{{ r.objective }}</td>
                     <td><span class="mono-label">{{ r.duration_weeks }} sem</span></td>
                     <td>{% for eid in r.ejercicio_ids %}{{ ejercicio_map.get(eid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
+                            <!-- Boton de editar -->
                             {% if r.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ r.id }})">✎ Editar</button>{% endif %}
                             {% if r.status == 'active' %}
+                            <!-- Boton de eliminar -->
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ r.id }})">✕ Eliminar</button>
                             {% else %}
+                            <!-- Boton de restaurar en eliminados -->
                             <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ r.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
+                <!-- Si no hay Rutinas -->
                 {% else %}
                 <tr><td colspan="7"><div class="empty-state"><h3>Sin rutinas</h3><p>No hay rutinas registradas aún.</p></div></td></tr>
                 {% endfor %}
@@ -90,11 +106,14 @@
         </table>
     </div>
 </div>
-
+<!-- Ventana emergente de crear -->
 <div class="modal-overlay" id="createModal"><div class="modal">
+    <!-- Boton de cerrar -->
     <button class="modal-close" onclick="closeModal('createModal')">✕</button>
     <h2>Nueva <span class="glow-text">Rutina</span></h2>
+    <!-- Evento de crear item -->
     <form id="createForm" onsubmit="return createItem(event)">
+        <!-- Caracteristicas a rellenar -->
         <div class="form-group"><label>Nombre</label><input name="name" required minlength="1"></div>
         <div class="form-group"><label>Nivel</label><select name="level" required><option value="Principiante">Principiante</option><option value="Intermedio">Intermedio</option><option value="Avanzado">Avanzado</option></select></div>
         <div class="form-group"><label>Objetivo</label><select name="objective" required><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
@@ -109,15 +128,18 @@
                 {% endfor %}
             </div>
         </div>
+        <!-- Boton de cancelar y enviar -->
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
     </form>
 </div></div>
-
+<!-- Ventana emergente de editar -->
 <div class="modal-overlay" id="editModal"><div class="modal">
     <button class="modal-close" onclick="closeModal('editModal')">✕</button>
     <h2>Editar <span class="glow-text">Rutina</span></h2>
+    <!-- Evento de editar -->
     <form id="editForm" onsubmit="return updateItem(event)">
         <input type="hidden" id="edit_id">
+        <!-- Caracteristicas a enviar -->
         <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1"></div>
         <div class="form-group"><label>Nivel</label><select id="edit_level" name="level" required><option value="Principiante">Principiante</option><option value="Intermedio">Intermedio</option><option value="Avanzado">Avanzado</option></select></div>
         <div class="form-group"><label>Objetivo</label><select id="edit_objective" name="objective" required><option value="Ganancia Muscular">Ganancia Muscular</option><option value="Perdida de grasa">Perdida de grasa</option><option value="Fuerza">Fuerza</option><option value="Resistencia">Resistencia</option></select></div>
@@ -132,7 +154,10 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
+         <!-- Boton de cancelar y enviar -->
+        <div class="form-actions">
+            <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button>
+            <button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
     </form>
 </div></div>
 {% endblock %}
@@ -140,26 +165,31 @@
 {% block scripts %}
 <script>
     const ENTITY = 'rutinas';
-
+    //Obetener los suplementos del checkbox
     function getCheckedEjercicioIds() {
         return Array.from(document.querySelectorAll('.ej-checkbox:checked')).map(cb => parseInt(cb.value));
     }
-
+    //Ir a vista detallada
     function gotoItem(id, status) {
         if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
         window.location = '/' + ENTITY + '/' + id;
     }
-
+    //Crear uno nuevo con los datos del formulario
     async function createItem(e) {
         e.preventDefault();
+        //Obtener datos
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd);
         data.duration_weeks = parseInt(data.duration_weeks);
+        //si no hay imagen define null
         if (!data.image_url) data.image_url = null;
+        //Obtener los ides de los ejerccicios
         const ejercicio_ids = getCheckedEjercicioIds();
+        //Llama a la endpoint de crear
         try {
             const result = await api('POST', '/' + ENTITY, data);
             if (ejercicio_ids.length) {
+                //Se le envia las ips de los ejercicios
                 await api('PUT', '/' + ENTITY + '/' + result.id + '/ejercicios', { ejercicio_ids });
             }
             showToast('Rutina creada');
@@ -167,8 +197,9 @@
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Editar un item
     async function editItem(id) {
+        //LLamado a la api para obtener ID e información
         try {
             const d = await api('GET', '/' + ENTITY + '/' + id);
             document.getElementById('edit_id').value = d.id;
@@ -183,16 +214,19 @@
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Actualziar uno
     async function updateItem(e) {
+        //Obtener datos
         e.preventDefault();
         const id = document.getElementById('edit_id').value;
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd);
         delete data.id;
         data.duration_weeks = parseInt(data.duration_weeks);
+        //Si no hay imagen null
         if (!data.image_url) data.image_url = null;
         const ejercicio_ids = getCheckedEjercicioIds();
+        //Envia datos a la api
         try {
             await api('PATCH', '/' + ENTITY + '/' + id, data);
             await api('PUT', '/' + ENTITY + '/' + id + '/ejercicios', { ejercicio_ids });
@@ -202,20 +236,34 @@
         } catch (err) { showToast(err.message, 'error'); }
     }
 
-    async function deleteItem(id) { if (!confirm('¿Eliminar esta rutina?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Rutina desactivada'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
-    async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Rutina restaurada'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
-
+    async function deleteItem(id) { 
+        if (!confirm('¿Eliminar esta rutina?')) return;
+        //Llamar a eliminar 
+        try { 
+            await api('DELETE', '/' + ENTITY + '/' + id); 
+            showToast('Rutina desactivada'); 
+            setTimeout(() => location.reload(), 500); 
+        } catch (err) { showToast(err.message, 'error'); } }
+    //Restaurar
+    async function restoreItem(id) { 
+        try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); 
+        showToast('Rutina restaurada'); 
+        setTimeout(() => location.reload(), 500); 
+    } catch (err) { showToast(err.message, 'error'); } }
+    //Obetener datos de los filtros y busquedas
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterLevel')?.addEventListener('change', filterTable);
     document.getElementById('filterObjective')?.addEventListener('change', filterTable);
     document.getElementById('filterDuration')?.addEventListener('change', filterTable);
     document.getElementById('filterEjercicio')?.addEventListener('change', filterTable);
+    //Tabla de filtro
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const lv = document.getElementById('filterLevel').value.toLowerCase();
         const obj = document.getElementById('filterObjective').value.toLowerCase();
         const dur = document.getElementById('filterDuration').value;
         const ej = document.getElementById('filterEjercicio').value.toLowerCase();
+        //Seleccionar toda la tabla
         document.querySelectorAll('#tableBody tr').forEach(tr => {
             const name = (tr.dataset.name || '').toLowerCase();
             const level = (tr.dataset.level || '').toLowerCase();
@@ -223,10 +271,13 @@
             const duration = parseInt(tr.dataset.duration || '0');
             const ejercicios = (tr.dataset.ejercicios || '').toLowerCase();
             let durMatch = true;
+            //Muestra solo los que se pidieron
+            //En duración
             if (dur) {
                 const [min, max] = dur.split('-').map(Number);
                 durMatch = isNaN(max) ? duration >= min : (duration >= min && duration <= max);
             }
+            //ñp demas
             tr.style.display = (!q || name.includes(q))
                 && (!lv || level === lv)
                 && (!obj || objective === obj)

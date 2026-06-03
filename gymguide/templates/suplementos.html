@@ -4,16 +4,22 @@
     <div class="flex-between mb-24">
         <div class="section-title" style="margin:0"><h2>Suplementos</h2><span class="line"></span></div>
         <div style="display:flex;gap:8px">
-            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Si esta en activos o no -->
             {% if showing_inactive %}
+            <!-- Boton de volver a activos -->
             <a href="/suplementos" class="cyber-btn cyber-btn-outline">← Ver activos</a>
             {% else %}
+            <!-- Boton de crear -->
+            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Boton ver inactivos -->
             <a href="/suplementos?status=inactive" class="cyber-btn cyber-btn-outline">🗑 Ver eliminados</a>
             {% endif %}
         </div>
     </div>
     <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Busqueda -->
         <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <!-- Filtro por tipo -->
         <select id="filterType" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos tipos</option>
             <option value="proteina">Proteina</option>
@@ -23,12 +29,14 @@
             <option value="vitaminas">Vitaminas</option>
             <option value="fat burner">Fat burner</option>
         </select>
+        <!-- Filtro por marca -->
         <select id="filterBrand" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todas marcas</option>
             {% for b in brands_set|sort %}
             <option value="{{ b|lower }}">{{ b }}</option>
             {% endfor %}
         </select>
+        <!-- Filtro por precio -->
         <select id="filterPrice" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Cualquier precio</option>
             <option value="0-25">$0 - $25</option>
@@ -37,18 +45,19 @@
             <option value="100-9999">$100+</option>
         </select>
     </div>
-
+    <!-- mapa marcas  -->
     {% set brands_set = [] %}
     {% for s in suplementos %}
       {% if s.brand and s.brand not in brands_set %}
         {% set _ = brands_set.append(s.brand) %}
       {% endif %}
     {% endfor %}
-
+    <!-- Tabla de suplementos -->
     <div class="table-wrap">
         <table>
             <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
+                <!-- Para cada suplemento -->
                 {% for s in suplementos %}
                 <tr data-id="{{ s.id }}" data-name="{{ s.name|lower }}" data-type="{{ s.type|lower }}"
                     data-brand="{{ s.brand|lower }}"
@@ -57,6 +66,7 @@
                     <td><span class="mono-label">{{ s.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
+                            <!-- Imagen subida -->
                             {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/512/4163/4163653.png"
@@ -67,20 +77,25 @@
                             <strong>{{ s.name }}</strong>
                         </div>
                     </td>
+                    <!-- Datos -->
                     <td><span class="tag">{{ s.type }}</span></td>
                     <td>{{ s.brand }}</td>
                     <td><span class="mono-label">{% if s.price %}${{ s.price }}{% else %}—{% endif %}</span></td>
                     <td>
                         <div class="action-group">
+                            <!-- Boton de editar -->
                             {% if s.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ s.id }})">✎ Editar</button>{% endif %}
                             {% if s.status == 'active' %}
+                            <!-- Boton de eliminar -->
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ s.id }})">✕ Eliminar</button>
                             {% else %}
+                            <!-- Boton de restaurar en eliminados -->
                             <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ s.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
+                <!-- Si no hay suplementos -->
                 {% else %}
                 <tr><td colspan="6"><div class="empty-state"><h3>Sin suplementos</h3><p>No hay suplementos registrados aún.</p></div></td></tr>
                 {% endfor %}
@@ -88,32 +103,39 @@
         </table>
     </div>
 </div>
-
+<!-- Ventana emergente de crear -->
 <div class="modal-overlay" id="createModal"><div class="modal">
+    <!-- Boton de cerrar -->
     <button class="modal-close" onclick="closeModal('createModal')">✕</button>
     <h2>Nuevo <span class="glow-text">Suplemento</span></h2>
+    <!-- Evento de crear item -->
     <form id="createForm" onsubmit="return createItem(event)">
+        <!-- Caracteristicas a rellenar -->
         <div class="form-group"><label>Nombre</label><input name="name" required minlength="1" maxlength="100"></div>
         <div class="form-group"><label>Tipo</label><select name="type" required><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
         <div class="form-group"><label>Marca</label><input name="brand" required maxlength="100"></div>
         <div class="form-group"><label>Beneficios</label><textarea name="benefits" rows="2"></textarea></div>
         <div class="form-group"><label>Precio ($)</label><input name="price" type="number" min="0" step="0.01"></div>
         <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+        <!-- Boton de cancelar y enviar -->
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
     </form>
 </div></div>
-
+<!-- Ventana emergente de editar -->
 <div class="modal-overlay" id="editModal"><div class="modal">
     <button class="modal-close" onclick="closeModal('editModal')">✕</button>
     <h2>Editar <span class="glow-text">Suplemento</span></h2>
+    <!-- Evento de editar -->
     <form id="editForm" onsubmit="return updateItem(event)">
         <input type="hidden" id="edit_id">
+        <!-- Caracteristicas a enviar -->
         <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1" maxlength="100"></div>
         <div class="form-group"><label>Tipo</label><select id="edit_type" name="type" required><option value="Proteina">Proteina</option><option value="Creatina">Creatina</option><option value="Pre-Entreno">Pre-Entreno</option><option value="Amino acidos">Amino acidos</option><option value="Vitaminas">Vitaminas</option><option value="Fat burner">Fat burner</option></select></div>
         <div class="form-group"><label>Marca</label><input id="edit_brand" name="brand" required maxlength="100"></div>
         <div class="form-group"><label>Beneficios</label><textarea id="edit_benefits" name="benefits" rows="2"></textarea></div>
         <div class="form-group"><label>Precio ($)</label><input id="edit_price" name="price" type="number" min="0" step="0.01"></div>
         <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
+        <!-- Boton de cancelar y enviar -->
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
     </form>
 </div></div>
@@ -122,19 +144,25 @@
 {% block scripts %}
 <script>
     const ENTITY = 'suplementos';
+    //Ver en detalle
     function gotoItem(id, status) {
         if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
         window.location = '/' + ENTITY + '/' + id;
     }
-
+    //Crear uno nuevo con los datos del formulario
     async function createItem(e) {
+        //Obtener datos
         e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
         if (data.price) data.price = parseFloat(data.price); else data.price = null;
+        //Si no hay imagen manda null
         if (!data.image_url) data.image_url = null;
+        //Llama a la endpoint de crear
         try { await api('POST', '/' + ENTITY, data); showToast('Suplemento creado'); closeModal('createModal'); setTimeout(() => location.reload(), 500); }
         catch (err) { showToast(err.message, 'error'); }
     }
+    //Editar un suplemento
     async function editItem(id) {
+        //LLamado a la api para obtener ID e información
         try { const d = await api('GET', '/' + ENTITY + '/' + id);
             document.getElementById('edit_id').value = d.id; document.getElementById('edit_name').value = d.name;
             document.getElementById('edit_type').value = d.type; document.getElementById('edit_brand').value = d.brand;
@@ -143,31 +171,42 @@
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
+    //Actualziar uno
     async function updateItem(e) {
+        //Obtener datos
         e.preventDefault(); const id = document.getElementById('edit_id').value;
         const fd = new FormData(e.target); const data = Object.fromEntries(fd); delete data.id;
         if (data.price) data.price = parseFloat(data.price); else data.price = null;
+        //Si no hay imagen null
         if (!data.image_url) data.image_url = null;
+        //Envia datos a la api
         try { await api('PATCH', '/' + ENTITY + '/' + id, data); showToast('Suplemento actualizado'); closeModal('editModal'); setTimeout(() => location.reload(), 500); }
         catch (err) { showToast(err.message, 'error'); }
     }
+    //Eliminar  
     async function deleteItem(id) { if (!confirm('¿Eliminar este suplemento?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Suplemento desactivado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    //Restaurar
     async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Suplemento restaurado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    //Obetener datos de los filtros y busquedas
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterType')?.addEventListener('change', filterTable);
     document.getElementById('filterBrand')?.addEventListener('change', filterTable);
     document.getElementById('filterPrice')?.addEventListener('change', filterTable);
+    //Tabla de filtro
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const tp = document.getElementById('filterType').value.toLowerCase();
         const br = document.getElementById('filterBrand').value.toLowerCase();
         const pr = document.getElementById('filterPrice').value;
+        //Seleccionar toda la tabla
         document.querySelectorAll('#tableBody tr').forEach(tr => {
+            //Leer atributos
             const name = (tr.dataset.name || '').toLowerCase();
             const type = (tr.dataset.type || '').toLowerCase();
             const brand = (tr.dataset.brand || '').toLowerCase();
             const price = parseFloat(tr.dataset.price || '0');
             let priceMatch = true;
+            //Muestra solo los que se pidieron
             if (pr) {
                 const [min, max] = pr.split('-').map(Number);
                 priceMatch = isNaN(max) ? price >= min : (price >= min && price <= max);

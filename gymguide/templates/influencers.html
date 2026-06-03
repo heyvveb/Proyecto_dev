@@ -4,17 +4,23 @@
     <div class="flex-between mb-24">
         <div class="section-title" style="margin:0"><h2>Influencers</h2><span class="line"></span></div>
         <div style="display:flex;gap:8px">
-            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Si esta en activos o no -->
             {% if showing_inactive %}
+            <!-- Boton de volver a activos -->
             <a href="/influencers" class="cyber-btn cyber-btn-outline">← Ver activos</a>
             {% else %}
+            <!-- Boton de crear -->
+            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Boton ver inactivos -->
             <a href="/influencers?status=inactive" class="cyber-btn cyber-btn-outline">🗑 Ver eliminados</a>
             {% endif %}
         </div>
     </div>
 
     <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Busqueda -->
         <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="cyber-btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <!-- Filtro por grupo Categoria -->
         <select id="filterCategory" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todas las categorías</option>
             <option value="bodybuilding">Bodybuilding</option>
@@ -23,12 +29,14 @@
             <option value="crossfit">Crossfit</option>
             <option value="yoga">Yoga</option>
         </select>
+        <!-- Filtro por rutina -->
         <select id="filterRutina" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todas las rutinas</option>
             {% for rname in rutinas_nombres %}
             <option value="{{ rname|lower }}">{{ rname }}</option>
             {% endfor %}
         </select>
+        <!-- Filtro por suplemento -->
         <select id="filterSuplemento" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos los suplementos</option>
             {% for s in all_suplementos %}
@@ -36,10 +44,10 @@
             {% endfor %}
         </select>
     </div>
-
+    <!-- mapa del ID de cada suplemento a su nombre -->
     {% set suplemento_map = {} %}
     {% for s in all_suplementos %}{% set _ = suplemento_map.__setitem__(s.id, s.name) %}{% endfor %}
-
+    <!-- Tabla de influencers -->
     <div class="table-wrap">
         <table>
             <thead>
@@ -54,6 +62,7 @@
                 </tr>
             </thead>
             <tbody id="influencersTable">
+                <!-- Para cada influencer -->
                 {% for inf in influencers %}
                 <tr data-id="{{ inf.id }}" data-name="{{ inf.name|lower }}" data-category="{{ inf.categoria.value|lower }}"
                     data-rutina="{{ (inf.rutina_recomendada_nombre or '')|lower }}"
@@ -62,6 +71,7 @@
                     <td><span class="mono-label">{{ inf.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
+                            <!-- Imagen subida -->
                             {% if inf.image_url %}
                             <img src="{{ inf.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">
                             {% else %}
@@ -76,21 +86,26 @@
                             <strong>{{ inf.name }}</strong>
                         </div>
                     </td>
+                    <!-- Datos -->
                     <td><span class="tag">{{ inf.categoria }}</span></td>
                     <td>{{ inf.red_social }}</td>
                     <td><span class="mono-label">{{ inf.rutina_recomendada_nombre or '—' }}</span></td>
                     <td>{% for sid in inf.suplemento_ids %}{{ suplemento_map.get(sid, '?') }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td>
                     <td>
                         <div class="action-group">
+                            <!-- Boton de editar -->
                             {% if inf.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editInfluencer({{ inf.id }})">✎ Editar</button>{% endif %}
                             {% if inf.status == 'active' %}
+                            <!-- Boton de eliminar -->
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteInfluencer({{ inf.id }})">✕ Eliminar</button>
                             {% else %}
+                            <!-- Boton de restaurar en eliminados -->
                             <button class="btn-icon restore" onclick="event.stopPropagation();restoreInfluencer({{ inf.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
+                <!-- Si no hay influencers -->
                 {% else %}
                 <tr><td colspan="7"><div class="empty-state"><h3>Sin influencers</h3><p>No hay influencers registrados aún.</p></div></td></tr>
                 {% endfor %}
@@ -98,12 +113,15 @@
         </table>
     </div>
 </div>
-
+<!-- Ventana emergente de crear -->
 <div class="modal-overlay" id="createModal">
     <div class="modal">
+        <!-- Boton de cerrar -->
         <button class="modal-close" onclick="closeModal('createModal')">✕</button>
         <h2>Nuevo <span class="glow-text">Influencer</span></h2>
+        <!-- Evento de crear item -->
         <form id="createForm" onsubmit="return createInfluencer(event)">
+            <!-- Caracteristicas a rellenar -->
             <div class="form-group"><label>Nombre</label><input name="name" required minlength="1" maxlength="100"></div>
             <div class="form-group"><label>Categoría</label>
                 <select name="categoria" required>
@@ -128,6 +146,7 @@
                     {% endfor %}
                 </div>
             </div>
+            <!-- Boton de cancelar y enviar -->
             <div class="form-actions">
                 <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button>
                 <button type="submit" class="cyber-btn cyber-btn-sm">Crear</button>
@@ -135,13 +154,15 @@
         </form>
     </div>
 </div>
-
+<!-- Ventana emergente de editar -->
 <div class="modal-overlay" id="editModal">
     <div class="modal">
         <button class="modal-close" onclick="closeModal('editModal')">✕</button>
         <h2>Editar <span class="glow-text">Influencer</span></h2>
+        <!-- Evento de editar -->
         <form id="editForm" onsubmit="return updateInfluencer(event)">
             <input type="hidden" id="edit_id" name="id">
+            <!-- Caracteristicas a enviar -->
             <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1" maxlength="100"></div>
             <div class="form-group"><label>Categoría</label>
                 <select id="edit_categoria" name="categoria" required>
@@ -166,6 +187,7 @@
                     {% endfor %}
                 </div>
             </div>
+            <!-- Boton de cancelar y enviar -->
             <div class="form-actions">
                 <button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button>
                 <button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button>
@@ -177,21 +199,27 @@
 
 {% block scripts %}
 <script>
+    //Obetener los suplementos del checkbox
     function getCheckedSuplementoIds() {
         return Array.from(document.querySelectorAll('.sup-checkbox:checked')).map(cb => parseInt(cb.value));
     }
-
+    //Crear uno nuevo con los datos del formulario
     async function createInfluencer(e) {
         e.preventDefault();
+        //Obtener datos
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd.entries());
+        //si no hay rutina define null
         if (data.rutina_recomendada_id === '') data.rutina_recomendada_id = null;
         else data.rutina_recomendada_id = parseInt(data.rutina_recomendada_id);
+        //Si no hay imagen manda null
         if (data.image_url === '') data.image_url = null;
         const suplemento_ids = getCheckedSuplementoIds();
+        //Llama a la endpoint de crear
         try {
             const result = await api('POST', '/influencers', data);
             if (suplemento_ids.length) {
+                //Se le envia las ips de los suplementos
                 await api('PUT', '/influencers/' + result.id + '/suplementos', { suplemento_ids });
             }
             showToast('Influencer creado exitosamente');
@@ -199,8 +227,9 @@
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Editar un item
     async function editInfluencer(id) {
+        //LLamado a la api para obtener ID e información
         try {
             const data = await api('GET', '/influencers/' + id);
             document.getElementById('edit_id').value = data.id;
@@ -216,17 +245,21 @@
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Actualziar uno
     async function updateInfluencer(e) {
+        //Obtener datos
         e.preventDefault();
         const id = document.getElementById('edit_id').value;
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd.entries());
         delete data.id;
+        //Si no hay rutina null
         if (data.rutina_recomendada_id === '') data.rutina_recomendada_id = null;
         else data.rutina_recomendada_id = parseInt(data.rutina_recomendada_id);
+        //Si no hay imagen null
         if (data.image_url === '') data.image_url = null;
         const suplemento_ids = getCheckedSuplementoIds();
+        //Envia datos a la api
         try {
             await api('PATCH', '/influencers/' + id, data);
             await api('PUT', '/influencers/' + id + '/suplementos', { suplemento_ids });
@@ -235,16 +268,17 @@
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Eliminar  
     async function deleteInfluencer(id) {
         if (!confirm('¿Eliminar este influencer?')) return;
+        //Llamar a eliminar
         try {
             await api('DELETE', '/influencers/' + id);
             showToast('Influencer desactivado');
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Restaurar
     async function restoreInfluencer(id) {
         try {
             await api('POST', '/influencers/' + id + '/restore');
@@ -252,7 +286,7 @@
             setTimeout(() => location.reload(), 500);
         } catch (err) { showToast(err.message, 'error'); }
     }
-
+    //Ir a vista detallada
     function gotoInfluencer(id, status) {
         if (status === 'inactive') {
             showToast('No se puede acceder: este influencer fue eliminado', 'error');
@@ -260,22 +294,25 @@
         }
         window.location = '/influencers/' + id;
     }
-
+    //Obetener datos de los filtros y busquedas
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
     document.getElementById('filterCategory')?.addEventListener('change', filterTable);
     document.getElementById('filterRutina')?.addEventListener('change', filterTable);
     document.getElementById('filterSuplemento')?.addEventListener('change', filterTable);
-
+    //Tabla de filtro
     function filterTable() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const cat = document.getElementById('filterCategory').value.toLowerCase();
         const rut = document.getElementById('filterRutina').value.toLowerCase();
         const sup = document.getElementById('filterSuplemento').value.toLowerCase();
+        //Seleccionar toda la tbla
         document.querySelectorAll('#influencersTable tr').forEach(tr => {
+            //Leer atributos
             const name = (tr.dataset.name || '').toLowerCase();
             const category = (tr.dataset.category || '').toLowerCase();
             const rutina = (tr.dataset.rutina || '').toLowerCase();
             const suplementos = (tr.dataset.suplementos || '').toLowerCase();
+            //Muestra solo los que se pidieron
             tr.style.display = (!q || name.includes(q))
                 && (!cat || category === cat)
                 && (!rut || rutina === rut)

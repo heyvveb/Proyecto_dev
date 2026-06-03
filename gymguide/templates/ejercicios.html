@@ -4,16 +4,22 @@
     <div class="flex-between mb-24">
         <div class="section-title" style="margin:0"><h2>Ejercicios</h2><span class="line"></span></div>
         <div style="display:flex;gap:8px">
-            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Si esta en activos o no -->
             {% if showing_inactive %}
+            <!-- Boton de volver a activos -->
             <a href="/ejercicios" class="cyber-btn cyber-btn-outline">← Ver activos</a>
             {% else %}
+            <!-- Boton de crear -->
+            <button class="cyber-btn" onclick="openModal('createModal')">+ Nuevo</button>
+            <!-- Boton ver inactivos -->
             <a href="/ejercicios?status=inactive" class="cyber-btn cyber-btn-outline">🗑 Ver eliminados</a>
             {% endif %}
         </div>
     </div>
     <div class="mb-24" style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Busqueda -->
         <input type="text" id="searchInput" placeholder="Buscar por nombre..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;flex:1;max-width:300px">
+        <!-- Filtro por grupo muscular -->
         <select id="filterMuscle" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none">
             <option value="">Todos grupos</option>
             <option value="pecho">Pecho</option>
@@ -28,15 +34,18 @@
         </select>
 
     </div>
+    <!-- Tabla de ejercicios -->
     <div class="table-wrap">
         <table>
             <thead><tr><th>ID</th><th>Nombre</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Acciones</th></tr></thead>
             <tbody id="tableBody">
+                <!-- Para cada ejercicio -->
                 {% for e in ejercicios %}
                 <tr data-id="{{ e.id }}" data-name="{{ e.name|lower }}" data-muscle="{{ e.grupo_muscular|lower }}" onclick="gotoItem({{ e.id }}, '{{ e.status }}')" style="cursor:pointer">
                     <td><span class="mono-label">{{ e.id }}</span></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
+                            <!-- Imagen subida -->
                             {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/256/2860/2860983.png"
@@ -47,21 +56,26 @@
                             <strong>{{ e.name }}</strong>
                         </div>
                     </td>
+                    <!-- Datos -->
                     <td><span class="tag">{{ e.grupo_muscular }}</span></td>
                     <td><span class="mono-label">{{ e.series }}</span></td>
                     <td><span class="mono-label">{{ e.repeticiones }}</span></td>
                     <td><span class="mono-label">{{ e.descanso_segundos }}s</span></td>
                     <td>
                         <div class="action-group">
+                            <!-- Boton de editar -->
                             {% if e.status == 'active' %}<button class="btn-icon edit" onclick="event.stopPropagation();editItem({{ e.id }})">✎ Editar</button>{% endif %}
                             {% if e.status == 'active' %}
+                            <!-- Boton de eliminar -->
                             <button class="btn-icon delete" onclick="event.stopPropagation();deleteItem({{ e.id }})">✕ Eliminar</button>
                             {% else %}
+                            <!-- Boton de restaurar en eliminados -->
                             <button class="btn-icon restore" onclick="event.stopPropagation();restoreItem({{ e.id }})">↺ Restaurar</button>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
+                <!-- Si no hay influencers -->
                 {% else %}
                 <tr><td colspan="7"><div class="empty-state"><h3>Sin ejercicios</h3><p>No hay ejercicios registrados aún.</p></div></td></tr>
                 {% endfor %}
@@ -69,11 +83,14 @@
         </table>
     </div>
 </div>
-
+<!-- Ventana emergente de crear -->
 <div class="modal-overlay" id="createModal"><div class="modal">
+    <!-- Boton de cerrar -->
     <button class="modal-close" onclick="closeModal('createModal')">✕</button>
     <h2>Nuevo <span class="glow-text">Ejercicio</span></h2>
+    <!-- Evento de crear item -->
     <form id="createForm" onsubmit="return createItem(event)">
+        <!-- Caracteristicas a rellenar -->
         <div class="form-group"><label>Nombre</label><input name="name" required minlength="1" maxlength="100"></div>
         <div class="form-group"><label>Grupo Muscular</label>
             <select name="grupo_muscular" required>
@@ -89,15 +106,18 @@
         <div class="form-group"><label>Repeticiones</label><input name="repeticiones" type="number" min="1" max="100" value="10"></div>
         <div class="form-group"><label>Descanso (segundos)</label><input name="descanso_segundos" type="number" min="0" max="600" value="60"></div>
         <div class="form-group"><label>URL Imagen</label><input name="image_url" placeholder="https://..."></div>
+        <!-- Boton de cancelar y enviar -->
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('createModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Crear</button></div>
     </form>
 </div></div>
-
+<!-- Ventana emergente de editar -->
 <div class="modal-overlay" id="editModal"><div class="modal">
     <button class="modal-close" onclick="closeModal('editModal')">✕</button>
     <h2>Editar <span class="glow-text">Ejercicio</span></h2>
+    <!-- Evento de editar -->
     <form id="editForm" onsubmit="return updateItem(event)">
         <input type="hidden" id="edit_id">
+        <!-- Caracteristicas a enviar -->
         <div class="form-group"><label>Nombre</label><input id="edit_name" name="name" required minlength="1" maxlength="100"></div>
         <div class="form-group"><label>Grupo Muscular</label>
             <select id="edit_grupo_muscular" name="grupo_muscular" required>
@@ -113,6 +133,7 @@
         <div class="form-group"><label>Repeticiones</label><input id="edit_repeticiones" name="repeticiones" type="number" min="1" max="100"></div>
         <div class="form-group"><label>Descanso (segundos)</label><input id="edit_descanso_segundos" name="descanso_segundos" type="number" min="0" max="600"></div>
         <div class="form-group"><label>URL Imagen</label><input id="edit_image_url" name="image_url"></div>
+        <!-- Boton de cancelar y enviar -->
         <div class="form-actions"><button type="button" class="cyber-btn cyber-btn-outline cyber-btn-sm" onclick="closeModal('editModal')">Cancelar</button><button type="submit" class="cyber-btn cyber-btn-sm">Guardar</button></div>
     </form>
 </div></div>
@@ -121,45 +142,88 @@
 {% block scripts %}
 <script>
     const ENTITY = 'ejercicios';
+    //Redirige a la vista de detalle 
     function gotoItem(id, status) {
         if (status === 'inactive') { showToast('No se puede acceder: este elemento fue eliminado', 'error'); return; }
         window.location = '/' + ENTITY + '/' + id;
     }
-
+    //Crear uno nuevo con los datos del formulario
     async function createItem(e) {
-        e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd);
-        data.series = parseInt(data.series); data.repeticiones = parseInt(data.repeticiones); data.descanso_segundos = parseInt(data.descanso_segundos);
+        //Obtener datos
+        e.preventDefault(); 
+        const fd = new FormData(e.target);
+        const data = Object.fromEntries(fd);
+        data.series = parseInt(data.series); 
+        data.repeticiones = parseInt(data.repeticiones); 
+        data.descanso_segundos = parseInt(data.descanso_segundos);
+        //Si no hay imagen manda null
         if (!data.image_url) data.image_url = null;
-        try { await api('POST', '/' + ENTITY, data); showToast('Ejercicio creado'); closeModal('createModal'); setTimeout(() => location.reload(), 500); }
+        //Llama a la endpoint de crear
+        try { await api('POST', '/' + ENTITY, data); 
+        showToast('Ejercicio creado'); closeModal('createModal'); 
+        setTimeout(() => location.reload(), 500); }
         catch (err) { showToast(err.message, 'error'); }
     }
+    //Editar un item
     async function editItem(id) {
+        //LLamado a la api para obtener ID
         try { const d = await api('GET', '/' + ENTITY + '/' + id);
-            document.getElementById('edit_id').value = d.id; document.getElementById('edit_name').value = d.name;
-            document.getElementById('edit_grupo_muscular').value = d.grupo_muscular; document.getElementById('edit_descripcion').value = d.descripcion || '';
+            //Obtener elementos y colocarlos en la ventana
+            document.getElementById('edit_id').value = d.id;
+            document.getElementById('edit_name').value = d.name;
+            document.getElementById('edit_grupo_muscular').value = d.grupo_muscular;
+            document.getElementById('edit_descripcion').value = d.descripcion || '';
             document.getElementById('edit_series').value = d.series; document.getElementById('edit_repeticiones').value = d.repeticiones;
             document.getElementById('edit_descanso_segundos').value = d.descanso_segundos; document.getElementById('edit_image_url').value = d.image_url || '';
             openModal('editModal');
         } catch (err) { showToast(err.message, 'error'); }
     }
+    //Actualziar uno
     async function updateItem(e) {
         e.preventDefault(); const id = document.getElementById('edit_id').value;
+        //Obtener datos
         const fd = new FormData(e.target); const data = Object.fromEntries(fd); delete data.id;
-        data.series = parseInt(data.series); data.repeticiones = parseInt(data.repeticiones); data.descanso_segundos = parseInt(data.descanso_segundos);
+        data.series = parseInt(data.series); 
+        data.repeticiones = parseInt(data.repeticiones);
+        data.descanso_segundos = parseInt(data.descanso_segundos);
+        //Si no hay imagen null
         if (!data.image_url) data.image_url = null;
+        //Envia datos a la api
         try { await api('PATCH', '/' + ENTITY + '/' + id, data); showToast('Ejercicio actualizado'); closeModal('editModal'); setTimeout(() => location.reload(), 500); }
         catch (err) { showToast(err.message, 'error'); }
     }
-    async function deleteItem(id) { if (!confirm('¿Eliminar este ejercicio?')) return; try { await api('DELETE', '/' + ENTITY + '/' + id); showToast('Ejercicio desactivado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
-    async function restoreItem(id) { try { await api('POST', '/' + ENTITY + '/' + id + '/restore'); showToast('Ejercicio restaurado'); setTimeout(() => location.reload(), 500); } catch (err) { showToast(err.message, 'error'); } }
+    //Eliminar 
+    async function deleteItem(id) { 
+        if (!confirm('¿Eliminar este ejercicio?')) return;
+        //Llamar a eliminar
+        try { 
+            await api('DELETE', '/' + ENTITY + '/' + id); 
+            showToast('Ejercicio desactivado'); 
+            setTimeout(() => location.reload(), 500);
+        } catch (err) { showToast(err.message, 'error'); } }
+    //Restaurar
+    async function restoreItem(id) { 
+        try { 
+            await api('POST', '/' + ENTITY + '/' + id + '/restore');
+            showToast('Ejercicio restaurado'); 
+            setTimeout(() => location.reload(), 500); 
+        } catch (err) { showToast(err.message, 'error'); } }
+    //Obtener por nombre
     document.getElementById('searchInput')?.addEventListener('input', filterTable);
+    //Obtener por grupo muscular
     document.getElementById('filterMuscle')?.addEventListener('change', filterTable);
+    //Tabla de filtro
     function filterTable() {
+        //Obtener el valor de lo escrito
         const q = document.getElementById('searchInput').value.toLowerCase();
+        //Obtener el valor de los filtros
         const mu = document.getElementById('filterMuscle').value.toLowerCase();
+        //Selecciona toda la tabla
         document.querySelectorAll('#tableBody tr').forEach(tr => {
+            //Lee los atributos de cada fila
             const name = (tr.dataset.name || '').toLowerCase();
             const muscle = (tr.dataset.muscle || '').toLowerCase();
+            //Muestra solo los que se pidieron
             tr.style.display = (!q || name.includes(q)) && (!mu || muscle === mu) ? '' : 'none';
         });
     }
