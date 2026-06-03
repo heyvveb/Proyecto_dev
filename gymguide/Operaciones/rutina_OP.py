@@ -1,102 +1,102 @@
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlmodel import Session
 from gymguide.models.rutina import Rutina, RutinaRead, RutinaUpdate
 from gymguide.models.ejercicio import Ejercicio, EjercicioRead
 from gymguide.models.influencer import Influencer, InfluencerRead
 from typing import Optional
 
 
-async def createRutina(db: AsyncSession, rutina: Rutina) -> RutinaRead:
+def createRutina(db: Session, rutina: Rutina) -> RutinaRead:
     model = Rutina(**rutina.model_dump())
     db.add(model)
-    await db.commit()
-    await db.refresh(model)
+    db.commit()
+    db.refresh(model)
     return _row_to_read(model)
 
 
-async def showRutinas(db: AsyncSession, include_inactive: bool = False) -> list[RutinaRead]:
+def showRutinas(db: Session, include_inactive: bool = False) -> list[RutinaRead]:
     query = select(Rutina).options(selectinload(Rutina.ejercicios))
     if not include_inactive:
         query = query.where(Rutina.status == "active")
-    result = await db.execute(query.order_by(Rutina.id))
+    result = db.execute(query.order_by(Rutina.id))
     rows = result.scalars().all()
     return [_row_to_read(r) for r in rows]
 
 
-async def showRutina_ID(db: AsyncSession, id: int, include_inactive: bool = False) -> Optional[RutinaRead]:
+def showRutina_ID(db: Session, id: int, include_inactive: bool = False) -> Optional[RutinaRead]:
     query = select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id)
     if not include_inactive:
         query = query.where(Rutina.status == "active")
-    result = await db.execute(query)
+    result = db.execute(query)
     row = result.scalar_one_or_none()
     return _row_to_read(row) if row else None
 
 
-async def updateRutina(db: AsyncSession, id: int, data: dict) -> Optional[RutinaRead]:
-    result = await db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id))
+def updateRutina(db: Session, id: int, data: dict) -> Optional[RutinaRead]:
+    result = db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
     for key, val in data.items():
         setattr(row, key, val)
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 
-async def deleteRutina(db: AsyncSession, id: int) -> Optional[Rutina]:
-    result = await db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id))
+def deleteRutina(db: Session, id: int) -> Optional[Rutina]:
+    result = db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "inactive"
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return row
 
 
-async def showRutinasLevel(db: AsyncSession, level: str) -> list[RutinaRead]:
-    result = await db.execute(
+def showRutinasLevel(db: Session, level: str) -> list[RutinaRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.level.ilike(level), Rutina.status == "active").order_by(Rutina.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def showRutinasObjective(db: AsyncSession, objective: str) -> list[RutinaRead]:
-    result = await db.execute(
+def showRutinasObjective(db: Session, objective: str) -> list[RutinaRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.objective.ilike(objective), Rutina.status == "active").order_by(Rutina.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def showRutinasName(db: AsyncSession, name: str) -> list[RutinaRead]:
-    result = await db.execute(
+def showRutinasName(db: Session, name: str) -> list[RutinaRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.name.ilike(f"%{name}%"), Rutina.status == "active").order_by(Rutina.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def showInactiveRutinas(db: AsyncSession) -> list[RutinaRead]:
-    result = await db.execute(
+def showInactiveRutinas(db: Session) -> list[RutinaRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.status == "inactive").order_by(Rutina.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def restoreRutina(db: AsyncSession, id: int) -> Optional[RutinaRead]:
-    result = await db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id, Rutina.status == "inactive"))
+def restoreRutina(db: Session, id: int) -> Optional[RutinaRead]:
+    result = db.execute(select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id, Rutina.status == "inactive"))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "active"
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 
-async def get_rutina_stats(db: AsyncSession) -> dict:
-    total = await db.execute(select(Rutina))
+def get_rutina_stats(db: Session) -> dict:
+    total = db.execute(select(Rutina))
     all_rows = total.scalars().all()
     active = sum(1 for r in all_rows if r.status == "active")
     inactive = sum(1 for r in all_rows if r.status == "inactive")
@@ -109,8 +109,8 @@ async def get_rutina_stats(db: AsyncSession) -> dict:
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_level": by_level, "by_objective": by_objective}
 
 
-async def get_rutina_ejercicios(db: AsyncSession, rutina_id: int) -> list[EjercicioRead]:
-    result = await db.execute(
+def get_rutina_ejercicios(db: Session, rutina_id: int) -> list[EjercicioRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == rutina_id)
     )
     row = result.scalar_one_or_none()
@@ -124,8 +124,8 @@ async def get_rutina_ejercicios(db: AsyncSession, rutina_id: int) -> list[Ejerci
     ) for e in (row.ejercicios or []) if e.status == "active"]
 
 
-async def get_rutina_influencers(db: AsyncSession, rutina_id: int) -> list[InfluencerRead]:
-    result = await db.execute(
+def get_rutina_influencers(db: Session, rutina_id: int) -> list[InfluencerRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.rutina_recomendada)).where(
             Influencer.rutina_recomendada_id == rutina_id, Influencer.status == "active"
         )
@@ -144,20 +144,20 @@ async def get_rutina_influencers(db: AsyncSession, rutina_id: int) -> list[Influ
     return out
 
 
-async def set_rutina_ejercicios(db: AsyncSession, id: int, ejercicio_ids: list[int]) -> Optional[RutinaRead]:
-    result = await db.execute(
+def set_rutina_ejercicios(db: Session, id: int, ejercicio_ids: list[int]) -> Optional[RutinaRead]:
+    result = db.execute(
         select(Rutina).options(selectinload(Rutina.ejercicios)).where(Rutina.id == id)
     )
     row = result.scalar_one_or_none()
     if not row:
         return None
     if ejercicio_ids:
-        ej = await db.execute(select(Ejercicio).where(Ejercicio.id.in_(ejercicio_ids)))
+        ej = db.execute(select(Ejercicio).where(Ejercicio.id.in_(ejercicio_ids)))
         row.ejercicios = list(ej.scalars().all())
     else:
         row.ejercicios = []
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 

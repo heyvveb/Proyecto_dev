@@ -1,105 +1,105 @@
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlmodel import Session
 from gymguide.models.influencer import Influencer, InfluencerRead, InfluencerUpdate
 from gymguide.models.rutina import Rutina
 from gymguide.models.suplemento import Suplemento, SuplementoRead
 from typing import Optional
 
 
-async def createInfluencer(db: AsyncSession, influencer: Influencer) -> InfluencerRead:
+def createInfluencer(db: Session, influencer: Influencer) -> InfluencerRead:
     if influencer.rutina_recomendada_id is not None:
-        result = await db.execute(select(Rutina).where(Rutina.id == influencer.rutina_recomendada_id, Rutina.status == "active"))
+        result = db.execute(select(Rutina).where(Rutina.id == influencer.rutina_recomendada_id, Rutina.status == "active"))
         if not result.scalar_one_or_none():
             raise ValueError(f"La rutina con ID {influencer.rutina_recomendada_id} no existe")
     model = Influencer(**influencer.model_dump())
     db.add(model)
-    await db.commit()
-    await db.refresh(model)
+    db.commit()
+    db.refresh(model)
     return _row_to_read(model)
 
 
-async def showInfluencers(db: AsyncSession, include_inactive: bool = False) -> list[InfluencerRead]:
+def showInfluencers(db: Session, include_inactive: bool = False) -> list[InfluencerRead]:
     query = select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos))
     if not include_inactive:
         query = query.where(Influencer.status == "active")
-    result = await db.execute(query.order_by(Influencer.id))
+    result = db.execute(query.order_by(Influencer.id))
     rows = result.scalars().all()
     return [_row_to_read(r) for r in rows]
 
 
-async def showInfluencer_ID(db: AsyncSession, id: int, include_inactive: bool = False) -> Optional[InfluencerRead]:
+def showInfluencer_ID(db: Session, id: int, include_inactive: bool = False) -> Optional[InfluencerRead]:
     query = select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id)
     if not include_inactive:
         query = query.where(Influencer.status == "active")
-    result = await db.execute(query)
+    result = db.execute(query)
     row = result.scalar_one_or_none()
     return _row_to_read(row) if row else None
 
 
-async def updateInfluencer(db: AsyncSession, id: int, data: dict) -> Optional[InfluencerRead]:
-    result = await db.execute(select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id))
+def updateInfluencer(db: Session, id: int, data: dict) -> Optional[InfluencerRead]:
+    result = db.execute(select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
     if "rutina_recomendada_id" in data and data["rutina_recomendada_id"] is not None:
-        r = await db.execute(select(Rutina).where(Rutina.id == data["rutina_recomendada_id"], Rutina.status == "active"))
+        r = db.execute(select(Rutina).where(Rutina.id == data["rutina_recomendada_id"], Rutina.status == "active"))
         if not r.scalar_one_or_none():
             raise ValueError(f"La rutina con ID {data['rutina_recomendada_id']} no existe")
     for key, val in data.items():
         setattr(row, key, val)
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 
-async def deleteInfluencer(db: AsyncSession, id: int) -> Optional[Influencer]:
-    result = await db.execute(select(Influencer).where(Influencer.id == id))
+def deleteInfluencer(db: Session, id: int) -> Optional[Influencer]:
+    result = db.execute(select(Influencer).where(Influencer.id == id))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "inactive"
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return row
 
 
-async def showInfluencersCategory(db: AsyncSession, categoria: str) -> list[InfluencerRead]:
-    result = await db.execute(
+def showInfluencersCategory(db: Session, categoria: str) -> list[InfluencerRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.categoria.ilike(categoria), Influencer.status == "active")
         .order_by(Influencer.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def showInfluencersName(db: AsyncSession, name: str) -> list[InfluencerRead]:
-    result = await db.execute(
+def showInfluencersName(db: Session, name: str) -> list[InfluencerRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.name.ilike(f"%{name}%"), Influencer.status == "active")
         .order_by(Influencer.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def showInactiveInfluencers(db: AsyncSession) -> list[InfluencerRead]:
-    result = await db.execute(
+def showInactiveInfluencers(db: Session) -> list[InfluencerRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.status == "inactive").order_by(Influencer.id)
     )
     return [_row_to_read(r) for r in result.scalars().all()]
 
 
-async def restoreInfluencer(db: AsyncSession, id: int) -> Optional[InfluencerRead]:
-    result = await db.execute(select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id, Influencer.status == "inactive"))
+def restoreInfluencer(db: Session, id: int) -> Optional[InfluencerRead]:
+    result = db.execute(select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id, Influencer.status == "inactive"))
     row = result.scalar_one_or_none()
     if not row:
         return None
     row.status = "active"
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 
-async def get_influencer_stats(db: AsyncSession) -> dict:
-    total = await db.execute(select(Influencer))
+def get_influencer_stats(db: Session) -> dict:
+    total = db.execute(select(Influencer))
     all_rows = total.scalars().all()
     active = sum(1 for r in all_rows if r.status == "active")
     inactive = sum(1 for r in all_rows if r.status == "inactive")
@@ -110,8 +110,8 @@ async def get_influencer_stats(db: AsyncSession) -> dict:
     return {"total": len(all_rows), "active": active, "inactive": inactive, "by_category": cats}
 
 
-async def get_influencer_suplementos(db: AsyncSession, influencer_id: int) -> list[SuplementoRead]:
-    result = await db.execute(
+def get_influencer_suplementos(db: Session, influencer_id: int) -> list[SuplementoRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.suplementos)).where(Influencer.id == influencer_id)
     )
     row = result.scalar_one_or_none()
@@ -124,20 +124,20 @@ async def get_influencer_suplementos(db: AsyncSession, influencer_id: int) -> li
     ) for s in (row.suplementos or []) if s.status == "active"]
 
 
-async def set_influencer_suplementos(db: AsyncSession, id: int, suplemento_ids: list[int]) -> Optional[InfluencerRead]:
-    result = await db.execute(
+def set_influencer_suplementos(db: Session, id: int, suplemento_ids: list[int]) -> Optional[InfluencerRead]:
+    result = db.execute(
         select(Influencer).options(selectinload(Influencer.rutina_recomendada), selectinload(Influencer.suplementos)).where(Influencer.id == id)
     )
     row = result.scalar_one_or_none()
     if not row:
         return None
     if suplemento_ids:
-        sups = await db.execute(select(Suplemento).where(Suplemento.id.in_(suplemento_ids)))
+        sups = db.execute(select(Suplemento).where(Suplemento.id.in_(suplemento_ids)))
         row.suplementos = list(sups.scalars().all())
     else:
         row.suplementos = []
-    await db.commit()
-    await db.refresh(row)
+    db.commit()
+    db.refresh(row)
     return _row_to_read(row)
 
 
