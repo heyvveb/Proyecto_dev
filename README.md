@@ -33,6 +33,8 @@ Todos los endpoints:
 | `DELETE` | `/{entidad}/{id}` | status → inactive |
 | `POST` | `/{entidad}/{id}/restore` | Restaurar registro inactivo |
 
+Mismos patrones para rutinas, suplementos y ejercicios.
+
 Endpoints de relaciones:
 
 | Método | Ruta | Descripción |
@@ -40,7 +42,6 @@ Endpoints de relaciones:
 | `PUT` | `/influencers/{id}/suplementos` | Asignar suplementos a un influencer |
 | `PUT` | `/rutinas/{id}/ejercicios` | Asignar ejercicios a una rutina |
 
-Mismos patrones para rutinas, suplementos y ejercicios.
 
 ### Páginas
 
