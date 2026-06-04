@@ -73,7 +73,7 @@
                         <div style="display:flex;align-items:center;gap:10px">
                             <!-- Imagen subida -->
                             {% if inf.image_url %}
-                            <img src="{{ inf.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">
+                            <img src="{{ inf.image_url }}" alt="" class="img-thumb" onerror="this.onerror=null; this.src='https://cdn-icons-png.magnific.com/512/9292/9292340.png';">
                             {% else %}
                             <div class="img-placeholder">
                                 <img 
