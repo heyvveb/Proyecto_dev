@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
+    <!-- Boton volver a influencer-->
     <a href="/influencers" class="cyber-btn cyber-btn-outline cyber-btn-sm mb-24" style="display:inline-flex;align-items:center;gap:6px">← Volver a Influencers</a>
-
+    <!-- Tarjeta detallada del influencer-->
     <div class="card" style="display:flex;gap:24px;align-items:flex-start">
+        <!-- Imagen -->
         <div style="flex-shrink:0">
             {% if inf.image_url %}
             <img src="{{ inf.image_url }}" alt="" style="width:200px;height:200px;border-radius:12px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
@@ -11,6 +13,7 @@
             <div style="width:200px;height:200px;background:var(--surface-2);border-radius:12px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:48px">📸</div>
             {% endif %}
         </div>
+        <!-- Datos de la influencer-->
         <div style="flex:1;min-width:0">
             <h2 style="margin:0 0 4px">{{ inf.name }}</h2>
             <span class="tag">{{ inf.categoria }}</span>
@@ -31,13 +34,14 @@
         </div>
         </div>
     </div>
-
+    <!-- Tabla de Suplementos-->
     <div class="card mt-24">
         <h3 style="margin:0 0 16px;font-size:16px">Suplementos Asociados</h3>
         <div class="table-wrap">
             <table>
                 <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Marca</th></tr></thead>
                 <tbody>
+                    <!-- Para cada ejercicio-->
                     {% for s in suplementos %}
                     <tr>
                         <td><span class="mono-label">{{ s.id }}</span></td>

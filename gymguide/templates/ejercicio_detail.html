@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
+    <!-- Boton volver a ejercicios-->
     <a href="/ejercicios" class="cyber-btn cyber-btn-outline cyber-btn-sm mb-24" style="display:inline-flex;align-items:center;gap:6px">← Volver a Ejercicios</a>
-
+    <!-- Tarjeta detalalda de la rutina-->
     <div class="card" style="display:flex;gap:24px;align-items:flex-start">
+        <!-- Imagen -->
         <div style="flex-shrink:0">
             {% if ej.image_url %}
             <img src="{{ ej.image_url }}" alt="" style="width:200px;height:200px;border-radius:12px;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">
@@ -11,11 +13,11 @@
             <div style="width:200px;height:200px;background:var(--surface-2);border-radius:12px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:48px">🎯</div>
             {% endif %}
         </div>
+        <!-- Datos de la rutina-->
         <div style="flex:1;min-width:0">
             <h2 style="margin:0 0 4px">{{ ej.name }}</h2>
             <span class="tag">{{ ej.grupo_muscular }}</span>
-            <span class="badge {% if ej.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ ej.status }}</span>
-
+            
             <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:24px">
             <div class="detail-field">
                 <span class="detail-label" style="color:var(--gray-400);font-family:'JetBrains Mono',monospace">Series</span>
@@ -36,17 +38,20 @@
         </div>
         </div>
     </div>
-
+    <!-- Tabla de rutinas que tienen el ejercicio -->
     <div class="card mt-24">
         <h3 style="margin:0 0 16px;font-size:16px">Rutinas que incluyen este ejercicio <span class="mono-label" style="font-size:12px">{{ rutinas|length }}</span></h3>
         <div class="table-wrap">
             <table>
                 <thead><tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Objetivo</th><th>Duración</th></tr></thead>
                 <tbody>
+                    <!-- Para cada rutina-->
                     {% for r in rutinas %}
                     <tr>
                         <td><span class="mono-label">{{ r.id }}</span></td>
+                        <!-- Direccionamiento de donde se encuentra la rutina en detalle-->
                         <td><a href="/rutinas/{{ r.id }}" style="color:var(--cyan)">{{ r.name }}</a></td>
+                        <!-- Atributos -->
                         <td><span class="tag">{{ r.level }}</span></td>
                         <td>{{ r.objective }}</td>
                         <td><span class="mono-label">{{ r.duration_weeks }} sem</span></td>
