@@ -67,7 +67,7 @@
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
                             <!-- Imagen subida -->
-                            {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                            {% if s.image_url %}<img src="{{ s.image_url }}" alt="" class="img-thumb" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/4163/4163653.png';">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/512/4163/4163653.png"
                                     alt="Suplementos"

@@ -69,7 +69,7 @@
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
                             <!-- Imagen subida -->
-                            {% if r.image_url %}<img src="{{ r.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                            {% if r.image_url %}<img src="{{ r.image_url }}" alt="" class="img-thumb" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/256/5606/5606891.png';">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/256/5606/5606891.png"
                                     alt="Calendario"

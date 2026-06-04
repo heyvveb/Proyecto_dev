@@ -46,7 +46,7 @@
                     <td>
                         <div style="display:flex;align-items:center;gap:10px">
                             <!-- Imagen subida -->
-                            {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.style.display='none'">{% else %}<div class="img-placeholder">
+                            {% if e.image_url %}<img src="{{ e.image_url }}" alt="" class="img-thumb" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/256/2860/2860983.png';">{% else %}<div class="img-placeholder">
                                 <img 
                                     src="https://cdn-icons-png.flaticon.com/256/2860/2860983.png"
                                     alt="Ejercicio"
